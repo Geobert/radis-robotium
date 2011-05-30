@@ -14,11 +14,12 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	private static final String LAUNCHER_ACTIVITY_FULL_CLASSNAME = "fr.geobert.radis.AccountList";
 	private static final String ACCOUNT_NAME = "Test";
 	private static final String ACCOUNT_START_SUM = "1000,50";
-	private static final String ACCOUNT_START_SUM_FORMATED = "1 000,50";
+	private static final String ACCOUNT_START_SUM_FORMATED_IN_EDITOR = "1 000,50";
+	private static final String ACCOUNT_START_SUM_FORMATED_ON_LIST= "1 000,50 €";
 	private static final String ACCOUNT_DESC = "Test Description";
 	private static final String ACCOUNT_NAME_2 = "Test2";
 	private static final String ACCOUNT_START_SUM_2 = "2000,50";
-	private static final String ACCOUNT_START_SUM_FORMATED_2 = "2 000,50 €";
+	private static final String ACCOUNT_START_SUM_FORMATED_ON_LIST_2 = "2 000,50 €";
 	private static final String ACCOUNT_DESC_2 = "Test Description 2";
 	
 	private static Class<?> launcherActivityClass;
@@ -58,6 +59,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(2, ACCOUNT_DESC);
 		solo.clickOnText("Ok");
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
+		assertTrue(ACCOUNT_NAME.equals(solo.getText(2).getText().toString()));
+		assertTrue(ACCOUNT_START_SUM_FORMATED_ON_LIST.equals(solo.getText(3).getText().toString()));
 	}
 
 	public void testEditAccount() {
@@ -66,7 +69,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Modifier");
 		assertTrue(ACCOUNT_NAME.equals(solo.getEditText(0).getText().toString()));
-		assertTrue(ACCOUNT_START_SUM_FORMATED.equals(solo.getEditText(1).getText().toString()));
+		assertTrue(ACCOUNT_START_SUM_FORMATED_IN_EDITOR.equals(solo.getEditText(1).getText().toString()));
 		assertTrue(ACCOUNT_DESC.equals(solo.getEditText(2).getText().toString()));
 		solo.clearEditText(0);
 		solo.enterText(0, ACCOUNT_NAME_2);
@@ -77,7 +80,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnText("Ok");
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		assertTrue(ACCOUNT_NAME_2.equals(solo.getText(2).getText().toString()));
-		assertTrue(ACCOUNT_START_SUM_FORMATED_2.equals(solo.getText(3).getText().toString()));
+		assertTrue(ACCOUNT_START_SUM_FORMATED_ON_LIST_2.equals(solo.getText(3).getText().toString()));
 	}
 	
 	public void testDeleteAccount() {
