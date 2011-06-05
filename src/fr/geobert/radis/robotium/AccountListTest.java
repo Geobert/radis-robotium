@@ -68,6 +68,15 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 			Log.i(AccountListTest.TAG, "EditText " + i + ": " + v.getText());
 		}
 	}
+	
+	private void sleep(long ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	protected void setUp() throws Exception {
 		solo = new Solo(getInstrumentation(), getActivity());
@@ -218,11 +227,15 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertFalse(solo.getButton("Échéancier").isEnabled());
 	}
 	
-	public void addScheduleOp() {
+	private void setUpSchOp() {
 		addAccount();
 		assertTrue(solo.getButton("Échéancier").isEnabled());
 		solo.clickOnButton("Échéancier");
 		assertEquals(0, solo.getCurrentListViews().get(0).getCount());
+	}
+	
+	public void addScheduleOp() {
+		setUpSchOp();
 		solo.pressMenuItem(0);
 		GregorianCalendar today = new GregorianCalendar();
 		//today.add(Calendar.MONTH, -1);
@@ -252,6 +265,35 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Mettre à jour");
 		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 993,00"));
+	}
+	
+	// issue 59 test
+	public void testDeleteAllOccurences() {
+		setUpSchOp();
+		solo.pressMenuItem(0);
+		GregorianCalendar today = new GregorianCalendar();
+		today.add(Calendar.MONTH, -2);
+		solo.setDatePicker(0, today.get(Calendar.YEAR), today.get(Calendar.MONTH), 4);
+		solo.enterText(3, OP_TP);
+		solo.enterText(4, "9,50");
+		solo.enterText(5, OP_TAG);
+		solo.enterText(6, OP_MODE);
+		solo.enterText(7, OP_DESC);
+		solo.clickOnButton("Ok");
+		sleep(1000);
+		solo.goBack();
+		solo.clickInList(0);
+		solo.clickInList(2);
+		sleep(2000);
+		solo.clickInList(3);
+		sleep(2000);
+		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1); // -1 is for "get more ops" line
+		solo.pressMenuItem(1);
+		solo.clickLongInList(0);
+		solo.clickOnMenuItem("Supprimer");
+		solo.clickOnButton("Tout");
+		solo.goBack();
+		assertEquals(0, solo.getCurrentListViews().get(0).getCount() - 1); // -1 is for "get more ops" line
 	}
 	
 	/**
@@ -298,12 +340,5 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton(2);
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 	}
-	
-	private void sleep(long ms) {
-		try {
-			Thread.sleep(ms);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+
 }
