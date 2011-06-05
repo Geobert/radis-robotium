@@ -2,11 +2,11 @@ package fr.geobert.radis.robotium;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.jayway.android.robotium.solo.Solo;
@@ -57,10 +57,17 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		ArrayList<TextView> tvs = solo.getCurrentTextViews(null);
 		for (int i = 0; i < tvs.size(); ++i) {
 			TextView v = tvs.get(i);
-			Log.i(AccountListTest.TAG, i + ": " + v.getText());
+			Log.i(AccountListTest.TAG, "TextView " + i + ": " + v.getText());
 		}
 	}
 
+	private void printCurrentEditTexts() {
+		ArrayList<EditText> tvs = solo.getCurrentEditTexts();
+		for (int i = 0; i < tvs.size(); ++i) {
+			EditText v = tvs.get(i);
+			Log.i(AccountListTest.TAG, "EditText " + i + ": " + v.getText());
+		}
+	}
 	@Override
 	protected void setUp() throws Exception {
 		solo = new Solo(getInstrumentation(), getActivity());
@@ -148,7 +155,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		addAccount();
 		solo.clickInList(0);
 	}
-	public void testAddOp() {
+	public void addOp() {
 		setUpOpTest();
 
 		solo.pressMenuItem(0);
@@ -189,6 +196,20 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getText(1).getText().toString().contains("= -2 796,50"));
 	}
 	
+	public void testDisableAutoNegate() {
+		setUpOpTest();
+		solo.pressMenuItem(0);
+		solo.enterText(3, OP_TP);
+		solo.enterText(4, "+");
+		for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+			solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
+		}
+		printCurrentEditTexts();
+		assertTrue(solo.getEditText(4).getText().toString().equals("+10,50"));
+		solo.clickOnButton("Ok");
+		assertTrue(solo.getText(1).getText().toString().contains("= 1 011,00"));
+		assertTrue(solo.getText(4).getText().toString().equals("10,50"));
+	}
 	/**
 	 * Schedule ops
 	 */
@@ -215,11 +236,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		solo.goBack();
 		solo.clickInList(0);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		sleep(1000);
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount() - 1); // -1 is for "get more ops" line
 		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 991,00"));
@@ -235,5 +252,35 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Mettre à jour");
 		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 993,00"));
+	}
+	
+	/**
+	 * Infos
+	 */
+	
+	public void testAddExistingInfo() {
+		setUpOpTest();
+		solo.pressMenuItem(0);
+		solo.enterText(0, ACCOUNT_NAME);
+		solo.enterText(1, ACCOUNT_START_SUM);
+		solo.clickOnButton(2);
+		solo.clickOnButton("Créer");
+		solo.enterText(0, "Atest");
+		solo.clickOnButton("Ok");
+		sleep(1000);
+		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
+		solo.clickOnButton(2);
+		solo.clickOnButton("Créer");
+		solo.enterText(0, "ATest");
+		solo.clickOnButton("Ok");
+		assertNotNull(solo.getText(getActivity().getString(fr.geobert.radis.R.string.item_exists)));
+	}
+	
+	private void sleep(long ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }
