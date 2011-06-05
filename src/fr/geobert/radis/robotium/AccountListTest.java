@@ -258,11 +258,14 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	 * Infos
 	 */
 	
+	// test adding info with different casing 
 	public void testAddExistingInfo() {
 		setUpOpTest();
 		solo.pressMenuItem(0);
-		solo.enterText(0, ACCOUNT_NAME);
-		solo.enterText(1, ACCOUNT_START_SUM);
+		solo.enterText(3, OP_TP);
+		for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+			solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
+		}
 		solo.clickOnButton(2);
 		solo.clickOnButton("Créer");
 		solo.enterText(0, "Atest");
@@ -274,6 +277,26 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(0, "ATest");
 		solo.clickOnButton("Ok");
 		assertNotNull(solo.getText(getActivity().getString(fr.geobert.radis.R.string.item_exists)));
+	}
+	
+	// issue 50 test
+	public void testAddInfoAndCreateOp() {
+		setUpOpTest();
+		solo.pressMenuItem(0);
+		solo.enterText(3, OP_TP);
+		for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+			solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
+		}
+		solo.clickOnButton(2);
+		solo.clickOnButton("Créer");
+		solo.enterText(0, "Atest");
+		solo.clickOnButton("Ok");
+		solo.clickInList(0);
+		solo.clickOnButton("Ok");
+		solo.clickOnButton("Ok");
+		solo.pressMenuItem(0);
+		solo.clickOnButton(2);
+		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 	}
 	
 	private void sleep(long ms) {
