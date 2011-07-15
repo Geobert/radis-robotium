@@ -13,6 +13,7 @@ import com.jayway.android.robotium.solo.Solo;
 
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.PrefsManager;
+import fr.geobert.radis.tools.Tools;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class AccountListTest extends ActivityInstrumentationTestCase2 {
@@ -104,7 +105,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton(0);
 		solo.enterText(0, ACCOUNT_NAME);
 		solo.enterText(1, ACCOUNT_START_SUM);
-		solo.enterText(2, ACCOUNT_DESC);
+		solo.enterText(3, ACCOUNT_DESC);
 		solo.clickOnText("Ok");
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		assertEquals(ACCOUNT_NAME, solo.getText(2).getText().toString());
@@ -116,7 +117,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton(0);
 		solo.enterText(0, ACCOUNT_NAME_2);
 		solo.enterText(1, ACCOUNT_START_SUM_2);
-		solo.enterText(2, ACCOUNT_DESC_2);
+		solo.enterText(3, ACCOUNT_DESC_2);
 		solo.clickOnText("Ok");
 		assertEquals(2, solo.getCurrentListViews().get(0).getCount());
 	}
@@ -127,13 +128,13 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertEquals(ACCOUNT_NAME, solo.getEditText(0).getText().toString());
 		assertEquals(ACCOUNT_START_SUM_FORMATED_IN_EDITOR, solo.getEditText(1)
 				.getText().toString());
-		assertEquals(ACCOUNT_DESC, solo.getEditText(2).getText().toString());
+		assertEquals(ACCOUNT_DESC, solo.getEditText(3).getText().toString());
 		solo.clearEditText(0);
 		solo.enterText(0, ACCOUNT_NAME_2);
 		solo.clearEditText(1);
 		solo.enterText(1, ACCOUNT_START_SUM_2);
-		solo.clearEditText(2);
-		solo.enterText(2, ACCOUNT_DESC_2);
+		solo.clearEditText(3);
+		solo.enterText(3, ACCOUNT_DESC_2);
 		solo.clickOnText("Ok");
 		// assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		assertEquals(ACCOUNT_NAME_2, solo.getText(2).getText().toString());
@@ -296,6 +297,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		printCurrentEditTexts();
 		assertTrue(solo.getEditText(4).getText().toString().equals("+10,50"));
 		solo.clickOnButton("Ok");
+		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 1 011,00"));
 		assertTrue(solo.getText(4).getText().toString().equals("10,50"));
 	}
@@ -319,6 +321,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		setUpSchOp();
 		solo.pressMenuItem(0);
 		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
 		// today.add(Calendar.MONTH, -1);
 		solo.setDatePicker(0, today.get(Calendar.YEAR),
 				today.get(Calendar.MONTH), 4);
@@ -358,6 +361,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		setUpSchOp();
 		solo.pressMenuItem(0);
 		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
 		today.add(Calendar.MONTH, -2);
 		solo.setDatePicker(0, today.get(Calendar.YEAR),
 				today.get(Calendar.MONTH), 4);
