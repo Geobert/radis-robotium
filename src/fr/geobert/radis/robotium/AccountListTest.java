@@ -187,7 +187,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(0);
 		assertNotNull(solo.getText("quick add"));
 		solo.goBack();
-		
+
 		solo.enterText(0, "quick add2");
 		solo.enterText(1, "+10,50");
 		solo.clickOnButton(2);
@@ -196,7 +196,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertNotNull(solo.getText("quick add"));
 		assertNotNull(solo.getText("quick add2"));
 		solo.goBack();
-		
+
 		// test labels and state
 		editAccount();
 		assertEquals(
@@ -335,11 +335,9 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.goBack();
 		solo.clickInList(0);
 		sleep(1000);
-		assertEquals(1, solo.getCurrentListViews().get(0).getCount() - 1); // -1
-																			// is
-																			// for
-																			// "get more ops"
-																			// line
+
+		// -1 is for "get more ops" line
+		assertEquals(1, solo.getCurrentListViews().get(0).getCount() - 1);
 		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 991,00"));
 	}
@@ -378,21 +376,17 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		sleep(2000);
 		solo.clickInList(3);
 		sleep(2000);
-		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1); // -1
-																			// is
-																			// for
-																			// "get more ops"
-																			// line
+		
+		// -1 is for "get more ops" line
+		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1); 
 		solo.pressMenuItem(1);
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Supprimer");
 		solo.clickOnButton("Tout");
 		solo.goBack();
-		assertEquals(0, solo.getCurrentListViews().get(0).getCount() - 1); // -1
-																			// is
-																			// for
-																			// "get more ops"
-																			// line
+		
+		// -1 is for "get more ops" line
+		assertEquals(0, solo.getCurrentListViews().get(0).getCount() - 1); 
 	}
 
 	/**
@@ -441,4 +435,62 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 	}
 
+	private void addOpOnDate(GregorianCalendar t) {
+		solo.pressMenuItem(0);
+		solo.setDatePicker(0, t.get(Calendar.YEAR), t.get(Calendar.MONTH), 4);
+		solo.enterText(3, OP_TP);
+		solo.enterText(4, "1");
+		solo.clickOnButton("Ok");
+	}
+
+	private void setUpProjTest1() {
+		addAccount();
+		solo.clickInList(0);
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		today.roll(Calendar.MONTH, -2);
+		for (int i = 0; i < 6; ++i) {
+			addOpOnDate(today);
+			today.roll(Calendar.MONTH, +1);
+		}
+	}
+
+	public void testProjectionFromOpList() {
+		// test mode 0
+		setUpProjTest1();
+		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
+
+		// test mode 1
+		solo.clickOnButton(0);
+		solo.pressSpinnerItem(0, 1);
+		assertTrue(solo.getEditText(0).isEnabled());
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		solo.enterText(0, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+		solo.clickOnButton("Ok");
+		assertTrue(solo.getButton(0).getText().toString().contains("= 996,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
+
+		// test mode 2
+		solo.clickOnButton(0);
+		solo.pressSpinnerItem(0, 2);
+		assertTrue(solo.getEditText(0).isEnabled());
+		today.roll(Calendar.MONTH, +3);
+		solo.enterText(0, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
+				+ "/" + Integer.toString(today.get(Calendar.MONTH)) + "/"
+				+ Integer.toString(today.get(Calendar.YEAR)));
+		solo.clickOnButton("Ok");
+		assertTrue(solo.getButton(0).getText().toString().contains("= 995,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
+		
+		solo.clickInList(solo.getCurrentListViews().get(0).getCount());
+		sleep(1000);
+		solo.clickInList(solo.getCurrentListViews().get(0).getCount());
+		sleep(1000);
+		solo.clickInList(5);
+		sleep(1000);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 995,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
+	}
 }
