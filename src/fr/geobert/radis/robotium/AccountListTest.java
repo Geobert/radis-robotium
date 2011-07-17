@@ -474,7 +474,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 		// test mode 2
 		solo.clickOnButton(0);
-		solo.pressSpinnerItem(0, 2);
+		solo.pressSpinnerItem(0, 1);
 		assertTrue(solo.getEditText(0).isEnabled());
 		today.roll(Calendar.MONTH, +3);
 		solo.enterText(0, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
@@ -492,5 +492,66 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		sleep(1000);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 995,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
+		
+		// test back to mode 0
+		solo.clickOnButton(0);
+		solo.pressSpinnerItem(0, -2);
+		assertFalse(solo.getEditText(0).isEnabled());
+		solo.clickOnButton("Ok");
+		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
 	}
+	
+	public void testProjectionFromAccount() {
+		setUpProjTest1();
+		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
+		
+		// test mode 1
+		solo.goBack();
+		solo.clickLongInList(0);
+		solo.clickOnMenuItem("Modifier");
+		solo.pressSpinnerItem(1, 1);
+		assertTrue(solo.getEditText(2).isEnabled());
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+		solo.clickOnButton("Ok");
+		assertTrue(solo.getText(3).getText().toString().contains("996,50"));
+		
+		// test mode 2
+		solo.clickLongInList(0);
+		solo.clickOnMenuItem("Modifier");
+		solo.pressSpinnerItem(1, 1);
+		assertTrue(solo.getEditText(2).isEnabled());
+		today.roll(Calendar.MONTH, +3);
+		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
+				+ "/" + Integer.toString(today.get(Calendar.MONTH)) + "/"
+				+ Integer.toString(today.get(Calendar.YEAR)));
+		solo.clickOnButton("Ok");
+		assertTrue(solo.getText(3).getText().toString().contains("995,50"));
+		
+		// test back to mode 0
+		solo.clickLongInList(0);
+		solo.clickOnMenuItem("Modifier");
+		solo.pressSpinnerItem(1, -2);
+		assertFalse(solo.getEditText(2).isEnabled());
+		solo.clickOnButton("Ok");
+		assertTrue(solo.getText(3).getText().toString().contains("994,50"));
+	}
+	
+//	public void testAddOpMode1() {
+//		solo.clickOnButton(0);
+//		solo.enterText(0, ACCOUNT_NAME);
+//		solo.enterText(1, ACCOUNT_START_SUM);
+//		solo.enterText(3, ACCOUNT_DESC);
+//		solo.pressSpinnerItem(1, 1);
+//		assertTrue(solo.getEditText(2).isEnabled());
+//		GregorianCalendar today = new GregorianCalendar();
+//		Tools.clearTimeOfCalendar(today);
+//		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+//		solo.clickOnButton("Ok");
+//		assertTrue(solo.getText(3).getText().toString().contains("1000,50"));
+//		
+//	}
 }
