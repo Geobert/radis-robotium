@@ -540,18 +540,20 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getText(3).getText().toString().contains("994,50"));
 	}
 	
-//	public void testAddOpMode1() {
-//		solo.clickOnButton(0);
-//		solo.enterText(0, ACCOUNT_NAME);
-//		solo.enterText(1, ACCOUNT_START_SUM);
-//		solo.enterText(3, ACCOUNT_DESC);
-//		solo.pressSpinnerItem(1, 1);
-//		assertTrue(solo.getEditText(2).isEnabled());
-//		GregorianCalendar today = new GregorianCalendar();
-//		Tools.clearTimeOfCalendar(today);
-//		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
-//		solo.clickOnButton("Ok");
-//		assertTrue(solo.getText(3).getText().toString().contains("1000,50"));
-//		
-//	}
+	public void testAddOpMode1() {
+		solo.clickOnButton(0);
+		solo.enterText(0, ACCOUNT_NAME);
+		solo.enterText(1, ACCOUNT_START_SUM);
+		solo.enterText(3, ACCOUNT_DESC);
+		solo.pressSpinnerItem(1, 1);
+		assertTrue(solo.getEditText(2).isEnabled());
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+		solo.clickOnButton("Ok");
+		assertTrue(solo.getText(3).getText().toString().contains("1 000,50"));
+		solo.clickInList(0);
+		solo.pressMenuItem(0);
+		
+	}
 }
