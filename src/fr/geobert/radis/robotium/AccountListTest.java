@@ -662,6 +662,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	
 	private void delOps() {
 		solo.clickLongInList(0);
+		sleep(500);
 		solo.clickOnMenuItem("Supprimer");
 		solo.clickOnButton("Oui");
 		assertTrue(solo.getButton(0).getText().toString().contains("= 1 001,50"));
