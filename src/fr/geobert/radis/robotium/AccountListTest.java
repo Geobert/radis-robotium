@@ -282,7 +282,6 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clearEditText(4);
 		solo.enterText(4, "103");
 		solo.clickOnButton("Ok");
-		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= -2 796,50"));
 	}
 
@@ -376,17 +375,17 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		sleep(2000);
 		solo.clickInList(3);
 		sleep(2000);
-		
+
 		// -1 is for "get more ops" line
-		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1); 
+		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1);
 		solo.pressMenuItem(1);
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Supprimer");
 		solo.clickOnButton("Tout");
 		solo.goBack();
-		
+
 		// -1 is for "get more ops" line
-		assertEquals(0, solo.getCurrentListViews().get(0).getCount() - 1); 
+		assertEquals(0, solo.getCurrentListViews().get(0).getCount() - 1);
 	}
 
 	/**
@@ -437,7 +436,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	private void addOpOnDate(GregorianCalendar t) {
 		solo.pressMenuItem(0);
-		solo.setDatePicker(0, t.get(Calendar.YEAR), t.get(Calendar.MONTH), 4);
+		solo.setDatePicker(0, t.get(Calendar.YEAR), t.get(Calendar.MONTH),
+				t.get(Calendar.DAY_OF_MONTH));
 		solo.enterText(3, OP_TP);
 		solo.enterText(4, "1");
 		solo.clickOnButton("Ok");
@@ -483,7 +483,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 		assertTrue(solo.getButton(0).getText().toString().contains("= 995,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
-		
+
 		solo.clickInList(solo.getCurrentListViews().get(0).getCount());
 		sleep(1000);
 		solo.clickInList(solo.getCurrentListViews().get(0).getCount());
@@ -492,7 +492,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		sleep(1000);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 995,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
-		
+
 		// test back to mode 0
 		solo.clickOnButton(0);
 		solo.pressSpinnerItem(0, -2);
@@ -501,12 +501,12 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
 	}
-	
+
 	public void testProjectionFromAccount() {
 		setUpProjTest1();
 		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
-		
+
 		// test mode 1
 		solo.goBack();
 		solo.clickLongInList(0);
@@ -518,7 +518,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
 		solo.clickOnButton("Ok");
 		assertTrue(solo.getText(3).getText().toString().contains("996,50"));
-		
+
 		// test mode 2
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Modifier");
@@ -530,7 +530,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 				+ Integer.toString(today.get(Calendar.YEAR)));
 		solo.clickOnButton("Ok");
 		assertTrue(solo.getText(3).getText().toString().contains("995,50"));
-		
+
 		// test back to mode 0
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Modifier");
@@ -539,8 +539,9 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 		assertTrue(solo.getText(3).getText().toString().contains("994,50"));
 	}
-	
-	public void testAddOpMode1() {
+
+	public void addOpMode1() {
+		// add account
 		solo.clickOnButton(0);
 		solo.enterText(0, ACCOUNT_NAME);
 		solo.enterText(1, ACCOUNT_START_SUM);
@@ -549,11 +550,137 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getEditText(2).isEnabled());
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
+		today.roll(Calendar.DAY_OF_MONTH, 1);
 		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
 		solo.clickOnButton("Ok");
-		assertTrue(solo.getText(3).getText().toString().contains("1 000,50"));
 		solo.clickInList(0);
-		solo.pressMenuItem(0);
+		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
+
+		today.roll(Calendar.DAY_OF_MONTH, -1);
+		addOpOnDate(today);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
+
+		// add op after X
+		today.roll(Calendar.MONTH, +1);
+		addOpOnDate(today);
+		solo.clickInList(0);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
+
+		// add op before X of next month, should update the current sum
+		today.roll(Calendar.MONTH, -2);
+		addOpOnDate(today);
+		solo.clickInList(0);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
+	}
+
+	public void editOpMode1() {
+		addOpMode1();
 		
+		solo.clickLongInList(0);
+		solo.clickOnMenuItem("Modifier");
+		solo.clearEditText(4);
+		solo.enterText(4, "+2");
+		solo.clickOnButton("Ok");
+		solo.clickInList(0);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
+		
+		solo.clickInList(3);
+		solo.clickLongInList(3);
+		solo.clickOnMenuItem("Modifier");
+		solo.clearEditText(4);
+		solo.enterText(4, "+2");
+		solo.clickOnButton("Ok");
+		solo.clickInList(0);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 1 001,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 1 003,50"));
+	}
+	
+	public void addOpMode2() {
+		// add account
+		solo.clickOnButton(0);
+		solo.enterText(0, ACCOUNT_NAME);
+		solo.enterText(1, ACCOUNT_START_SUM);
+		solo.enterText(3, ACCOUNT_DESC);
+		solo.pressSpinnerItem(1, 2);
+		assertTrue(solo.getEditText(2).isEnabled());
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		today.roll(Calendar.DAY_OF_MONTH, 1);
+		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
+				+ "/" + Integer.toString(today.get(Calendar.MONTH) + 1) + "/"
+				+ Integer.toString(today.get(Calendar.YEAR)));
+		solo.clickOnButton("Ok");
+		solo.clickInList(0);
+		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
+
+		today.roll(Calendar.DAY_OF_MONTH, -1);
+		addOpOnDate(today);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
+
+		// add op after X
+		today.roll(Calendar.MONTH, +1);
+		addOpOnDate(today);
+		solo.clickInList(0);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
+
+		// add op before X of next month, should update the current sum
+		today.roll(Calendar.MONTH, -2);
+		addOpOnDate(today);
+		solo.clickInList(0);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
+	}
+	
+	public void editOpMode2() {
+		addOpMode2();
+		
+		solo.clickLongInList(0);
+		solo.clickOnMenuItem("Modifier");
+		solo.clearEditText(4);
+		solo.enterText(4, "+2");
+		solo.clickOnButton("Ok");
+		solo.clickInList(0);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
+		
+		solo.clickInList(3);
+		solo.clickLongInList(3);
+		solo.clickOnMenuItem("Modifier");
+		solo.clearEditText(4);
+		solo.enterText(4, "+2");
+		solo.clickOnButton("Ok");
+		solo.clickInList(0);
+		assertTrue(solo.getButton(0).getText().toString().contains("= 1 001,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 1 003,50"));
+	}
+	
+	private void delOps() {
+		solo.clickLongInList(0);
+		solo.clickOnMenuItem("Supprimer");
+		solo.clickOnButton("Oui");
+		assertTrue(solo.getButton(0).getText().toString().contains("= 1 001,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 1 001,50"));
+		
+		solo.clickLongInList(2);
+		solo.clickOnMenuItem("Supprimer");
+		solo.clickOnButton("Oui");
+		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
+	}
+	
+	public void testDelOpMode1() {
+		editOpMode1();
+		delOps();
+	}
+	
+	public void testDelOpMode2() {
+		editOpMode2();
+		delOps();
 	}
 }
