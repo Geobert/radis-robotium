@@ -305,6 +305,15 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	}
 
 	private void setUpSchOp() {
+		solo.pressMenuItem(1);
+		solo.clickOnText("Date d'insertion");
+		solo.clearEditText(0);
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		today.roll(Calendar.DAY_OF_MONTH, 1);
+		solo.enterText(0, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+		solo.clickOnButton("Ok");
+		solo.goBack();
 		addAccount();
 		assertTrue(solo.getButton("Échéancier").isEnabled());
 		solo.clickOnButton("Échéancier");
@@ -316,7 +325,6 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.pressMenuItem(0);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		// today.add(Calendar.MONTH, -1);
 		solo.setDatePicker(0, today.get(Calendar.YEAR),
 				today.get(Calendar.MONTH), 4);
 		solo.enterText(3, OP_TP);
@@ -328,7 +336,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		solo.goBack();
 		solo.clickInList(0);
-		sleep(1000);
+		sleep(15000);
 
 		// -1 is for "get more ops" line
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount() - 1);
@@ -687,7 +695,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	private void delOps() {
 		solo.clickLongInList(0);
-		sleep(500);
+		sleep(1000);
 		solo.clickOnMenuItem("Supprimer");
 		solo.clickOnButton("Oui");
 		assertTrue(solo.getButton(0).getText().toString()
