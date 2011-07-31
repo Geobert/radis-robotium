@@ -310,7 +310,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clearEditText(0);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.roll(Calendar.DAY_OF_MONTH, 1);
+		today.add(Calendar.DAY_OF_MONTH, 1);
 		solo.enterText(0, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
 		solo.clickOnButton("Ok");
 		solo.goBack();
@@ -339,7 +339,6 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		sleep(1000);
 		// -1 is for "get more ops" line
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount() - 1);
-		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 991,00"));
 	}
 
@@ -363,7 +362,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		Tools.clearTimeOfCalendar(today);
 		today.add(Calendar.MONTH, -2);
 		solo.setDatePicker(0, today.get(Calendar.YEAR),
-				today.get(Calendar.MONTH), 4);
+				today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
 		solo.enterText(3, OP_TP);
 		solo.enterText(4, "9,50");
 		solo.enterText(5, OP_TAG);
@@ -450,10 +449,11 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(0);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.roll(Calendar.MONTH, -2);
+		today.set(Calendar.DAY_OF_MONTH, 28);
+		today.add(Calendar.MONTH, -2);
 		for (int i = 0; i < 6; ++i) {
 			addOpOnDate(today);
-			today.roll(Calendar.MONTH, +1);
+			today.add(Calendar.MONTH, +1);
 		}
 	}
 
@@ -468,7 +468,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		setUpProjTest1();
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.roll(Calendar.MONTH, +3);
+		today.set(Calendar.DAY_OF_MONTH, 28);
+		today.add(Calendar.MONTH, 3);
+		Log.d(TAG, "testProjectionFromOpList : " + getDateStr(today) + " VS " + solo.getButton(0).getText().toString());
+		
 		assertTrue(solo.getButton(0).getText().toString()
 				.contains(getDateStr(today)));
 		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
@@ -479,10 +482,11 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.pressSpinnerItem(0, 1);
 		assertTrue(solo.getEditText(0).isEnabled());
 		today = new GregorianCalendar();
+		today.set(Calendar.DAY_OF_MONTH, 28);
 		Tools.clearTimeOfCalendar(today);
-		solo.enterText(0, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+		solo.enterText(0, "28");
 		solo.clickOnButton("Ok");
-		today.roll(Calendar.MONTH, 1);
+		today.add(Calendar.MONTH, 1);
 		Log.d(TAG, "1DATE : " + getDateStr(today));
 		Log.d(TAG, "1DATE displayed : "
 				+ solo.getButton(0).getText().toString());
@@ -497,7 +501,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getEditText(0).isEnabled());
 		today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.roll(Calendar.MONTH, +3);
+		today.set(Calendar.DAY_OF_MONTH, 28);
+		today.add(Calendar.MONTH, +3);
 		solo.enterText(0, getDateStr(today));
 		solo.clickOnButton("Ok");
 
@@ -550,8 +555,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getEditText(2).isEnabled());
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+		solo.enterText(2, "28");
 		solo.clickOnButton("Ok");
+		
+	
 		assertTrue(solo.getText(3).getText().toString().contains("996,50"));
 
 		// test mode 2
@@ -559,9 +566,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnMenuItem("Modifier");
 		solo.pressSpinnerItem(1, 1);
 		assertTrue(solo.getEditText(2).isEnabled());
-		today.roll(Calendar.MONTH, +3);
+		today.set(Calendar.DAY_OF_MONTH, 28);
+		today.add(Calendar.MONTH, +2);
 		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
-				+ "/" + Integer.toString(today.get(Calendar.MONTH)) + "/"
+				+ "/" + Integer.toString(today.get(Calendar.MONTH) + 1) + "/"
 				+ Integer.toString(today.get(Calendar.YEAR)));
 		solo.clickOnButton("Ok");
 		assertTrue(solo.getText(3).getText().toString().contains("995,50"));
@@ -585,26 +593,26 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getEditText(2).isEnabled());
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.roll(Calendar.DAY_OF_MONTH, 1);
+		today.add(Calendar.DAY_OF_MONTH, 1);
 		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
 		solo.clickOnButton("Ok");
 		solo.clickInList(0);
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
 
-		today.roll(Calendar.DAY_OF_MONTH, -1);
+		today.add(Calendar.DAY_OF_MONTH, -1);
 		addOpOnDate(today);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
 
 		// add op after X
-		today.roll(Calendar.MONTH, +1);
+		today.add(Calendar.MONTH, +1);
 		addOpOnDate(today);
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
 
 		// add op before X of next month, should update the current sum
-		today.roll(Calendar.MONTH, -2);
+		today.add(Calendar.MONTH, -2);
 		addOpOnDate(today);
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
@@ -645,7 +653,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getEditText(2).isEnabled());
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.roll(Calendar.DAY_OF_MONTH, 1);
+		today.add(Calendar.DAY_OF_MONTH, 1);
 		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
 				+ "/" + Integer.toString(today.get(Calendar.MONTH) + 1) + "/"
 				+ Integer.toString(today.get(Calendar.YEAR)));
@@ -653,20 +661,21 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(0);
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
 
-		today.roll(Calendar.DAY_OF_MONTH, -1);
+		today.add(Calendar.DAY_OF_MONTH, -1);
 		addOpOnDate(today);
+		
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
 
 		// add op after X
-		today.roll(Calendar.MONTH, +1);
+		today.add(Calendar.MONTH, +1);
 		addOpOnDate(today);
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
 
 		// add op before X of next month, should update the current sum
-		today.roll(Calendar.MONTH, -2);
+		today.add(Calendar.MONTH, -2);
 		addOpOnDate(today);
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
@@ -698,7 +707,6 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	}
 
 	private void delOps() {
-		Log.d("Radis", "-----> delOps");
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Supprimer");
 		solo.clickOnButton("Oui");
@@ -710,7 +718,6 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Oui");
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
-		Log.d("Radis", "<----- delOps");
 	}
 
 	public void testDelOpMode1() {
