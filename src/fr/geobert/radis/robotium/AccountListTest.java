@@ -449,7 +449,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(0);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.set(Calendar.DAY_OF_MONTH, 28);
+		today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
 		today.add(Calendar.MONTH, -2);
 		for (int i = 0; i < 6; ++i) {
 			addOpOnDate(today);
@@ -468,7 +468,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		setUpProjTest1();
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.set(Calendar.DAY_OF_MONTH, 28);
+		today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
 		today.add(Calendar.MONTH, 3);
 		Log.d(TAG, "testProjectionFromOpList : " + getDateStr(today) + " VS " + solo.getButton(0).getText().toString());
 		
@@ -482,9 +482,9 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.pressSpinnerItem(0, 1);
 		assertTrue(solo.getEditText(0).isEnabled());
 		today = new GregorianCalendar();
-		today.set(Calendar.DAY_OF_MONTH, 28);
+		today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
 		Tools.clearTimeOfCalendar(today);
-		solo.enterText(0, "28");
+		solo.enterText(0, Integer.toString(Math.min(today.get(Calendar.DAY_OF_MONTH), 28)));
 		solo.clickOnButton("Ok");
 		today.add(Calendar.MONTH, 1);
 		Log.d(TAG, "1DATE : " + getDateStr(today));
@@ -555,10 +555,9 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getEditText(2).isEnabled());
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		solo.enterText(2, "28");
+		solo.enterText(2, Integer.toString(Math.min(today.get(Calendar.DAY_OF_MONTH), 28)));
 		solo.clickOnButton("Ok");
 		
-	
 		assertTrue(solo.getText(3).getText().toString().contains("996,50"));
 
 		// test mode 2
