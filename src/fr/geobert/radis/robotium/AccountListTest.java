@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.jayway.android.robotium.solo.Solo;
 
 import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.tools.PrefsManager;
+import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Tools;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -151,7 +151,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	}
 
 	public void testQuickAddStateOnHomeScreen() {
-		PrefsManager.getInstance(getActivity()).resetAll();
+		CommonDbAdapter.getInstance(getActivity()).open();
+		DBPrefsManager.getInstance(getActivity()).resetAll();
 
 		assertFalse(solo.getEditText(0).isEnabled());
 		assertFalse(solo.getEditText(1).isEnabled());
@@ -597,22 +598,23 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 		solo.clickInList(0);
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
-
+		Log.d(TAG, "addOpMode1 before add " + solo.getCurrentListViews().get(0).getCount());
 		today.add(Calendar.DAY_OF_MONTH, -1);
 		addOpOnDate(today);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
-
+		Log.d(TAG, "addOpMode1 after one add " + solo.getCurrentListViews().get(0).getCount());
 		// add op after X
 		today.add(Calendar.MONTH, +1);
 		addOpOnDate(today);
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
-
+		Log.d(TAG, "addOpMode1 after two add " + solo.getCurrentListViews().get(0).getCount());
 		// add op before X of next month, should update the current sum
 		today.add(Calendar.MONTH, -2);
 		addOpOnDate(today);
+		Log.d(TAG, "addOpMode1 after three add " + solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
@@ -629,14 +631,17 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
-
+		Log.d(TAG, "editOpMode1 after one edit " + solo.getCurrentListViews().get(0).getCount());
+		
 		solo.clickInList(3);
 		solo.clickLongInList(3);
 		solo.clickOnMenuItem("Modifier");
 		solo.clearEditText(4);
 		solo.enterText(4, "+2");
 		solo.clickOnButton("Ok");
+		Log.d(TAG, "editOpMode1 after one edit " + solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
+		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1);
 		assertTrue(solo.getButton(0).getText().toString()
 				.contains("= 1 001,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 003,50"));
@@ -658,17 +663,19 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 				+ Integer.toString(today.get(Calendar.YEAR)));
 		solo.clickOnButton("Ok");
 		solo.clickInList(0);
+		Log.d(TAG, "addOpMode2 before add " + solo.getCurrentListViews().get(0).getCount());
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
 
 		today.add(Calendar.DAY_OF_MONTH, -1);
 		addOpOnDate(today);
-		
+		Log.d(TAG, "addOpMode2 after one add " + solo.getCurrentListViews().get(0).getCount());
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
 
 		// add op after X
 		today.add(Calendar.MONTH, +1);
 		addOpOnDate(today);
+		Log.d(TAG, "addOpMode2 after two add " + solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
@@ -676,6 +683,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		// add op before X of next month, should update the current sum
 		today.add(Calendar.MONTH, -2);
 		addOpOnDate(today);
+		Log.d(TAG, "addOpMode2 after three add " + solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
@@ -692,7 +700,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(0);
 		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
-
+		Log.d(TAG, "editOpMode2 after one edit " + solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(3);
 		solo.clickLongInList(3);
 		solo.clickOnMenuItem("Modifier");
@@ -700,6 +708,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(4, "+2");
 		solo.clickOnButton("Ok");
 		solo.clickInList(0);
+		Log.d(TAG, "editOpMode2 after two edit " + solo.getCurrentListViews().get(0).getCount());
+		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1);
 		assertTrue(solo.getButton(0).getText().toString()
 				.contains("= 1 001,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 003,50"));
