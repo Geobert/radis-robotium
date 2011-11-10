@@ -259,7 +259,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	public void addManyOps() {
 		setUpOpTest();
-		for (int j = 0; j < 40; ++j) {
+		for (int j = 0; j < 30; ++j) {
 			solo.pressMenuItem(0);
 			solo.enterText(3, OP_TP + j);
 			solo.enterText(4, OP_AMOUNT_2);
@@ -268,17 +268,18 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 			solo.enterText(7, OP_DESC);
 			solo.clickOnButton("Ok");
 		}
-		assertTrue(solo.getText(1).getText().toString().contains("= -2 999,50"));
+		assertTrue(solo.getText(1).getText().toString().contains("= -1 999,50"));
 	}
 
 	public void testEditOp() {
 		addManyOps();
+		solo.scrollUpList(0);
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Modifier");
 		solo.clearEditText(4);
 		solo.enterText(4, "103");
 		solo.clickOnButton("Ok");
-		assertTrue(solo.getText(1).getText().toString().contains("= -2 796,50"));
+		assertTrue(solo.getText(1).getText().toString().contains("= -1 796,50"));
 	}
 
 	public void testDisableAutoNegate() {
@@ -641,6 +642,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 		Log.d(TAG, "editOpMode1 after one edit " + solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
+		sleep(15000);
 		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1);
 		assertTrue(solo.getButton(0).getText().toString()
 				.contains("= 1 001,50"));
@@ -737,5 +739,52 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	public void testDelOpMode2() {
 		editOpMode2();
 		delOps();
+	}
+	
+	// test for issue 95
+	public void DelOpMode1_2() {
+		setUpOpTest();
+		for (int j = 0; j < 10; ++j) {
+			solo.pressMenuItem(0);
+			solo.enterText(3, OP_TP + j);
+			solo.enterText(4, "10");
+			solo.enterText(5, OP_TAG);
+			solo.enterText(6, OP_MODE);
+			solo.enterText(7, OP_DESC);
+			solo.clickOnButton("Ok");
+		}
+		Log.d(TAG, "testDelOpMode1_2 sum at selection after first adds: " + solo.getText(1).getText().toString());
+		assertTrue(solo.getText(1).getText().toString().contains("= 900,50"));
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
+		today.add(Calendar.MONTH, -1);
+		for (int i = 0; i < 10; ++i) {
+			addOpOnDate(today);
+		}
+
+		solo.clickInList(9);
+		Log.d(TAG, "testDelOpMode1_2 sum at selection : " + solo.getText(0).getText().toString());
+		Log.d(TAG, "testDelOpMode1_2 sum at proj : " + solo.getButton(0).getText().toString());
+		assertTrue(solo.getText(0).getText().toString().contains("= 980,50"));
+		assertTrue(solo.getButton(0).getText().toString()
+				.contains("= 890,50"));
+		solo.clickInList(9);
+		
+		Log.d(TAG, "testDelOpMode1_2 sum at selection 2 : " + solo.getText(0).getText().toString());
+		Log.d(TAG, "testDelOpMode1_2 sum at proj 2 : " + solo.getButton(0).getText().toString());
+		assertTrue(solo.getText(0).getText().toString().contains("= 990,50"));
+		assertTrue(solo.getButton(0).getText().toString()
+				.contains("= 890,50"));
+		solo.clickLongInList(9);
+		sleep(1000);
+		solo.clickOnMenuItem("Supprimer");
+		solo.clickOnButton("Oui");
+		
+		Log.d(TAG, "testDelOpMode1_2 sum at selection after del : " + solo.getText(0).getText().toString());
+		Log.d(TAG, "testDelOpMode1_2 sum at proj after del : " + solo.getButton(0).getText().toString());
+		assertTrue(solo.getButton(0).getText().toString()
+				.contains("= 891,50"));
+		assertTrue(solo.getText(0).getText().toString().contains("= 991,50"));
 	}
 }
