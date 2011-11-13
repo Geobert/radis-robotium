@@ -37,8 +37,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	private static Class<?> launcherActivityClass;
 	static {
 		try {
-			launcherActivityClass = Class
-					.forName(LAUNCHER_ACTIVITY_FULL_CLASSNAME);
+			launcherActivityClass = Class.forName(LAUNCHER_ACTIVITY_FULL_CLASSNAME);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -109,8 +108,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnText("Ok");
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		assertEquals(ACCOUNT_NAME, solo.getText(2).getText().toString());
-		assertEquals(ACCOUNT_START_SUM_FORMATED_ON_LIST, solo.getText(3)
-				.getText().toString());
+		assertEquals(ACCOUNT_START_SUM_FORMATED_ON_LIST, solo.getText(3).getText().toString());
 	}
 
 	public void addAccount2() {
@@ -126,8 +124,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Modifier");
 		assertEquals(ACCOUNT_NAME, solo.getEditText(0).getText().toString());
-		assertEquals(ACCOUNT_START_SUM_FORMATED_IN_EDITOR, solo.getEditText(1)
-				.getText().toString());
+		assertEquals(ACCOUNT_START_SUM_FORMATED_IN_EDITOR, solo.getEditText(1).getText().toString());
 		assertEquals(ACCOUNT_DESC, solo.getEditText(3).getText().toString());
 		solo.clearEditText(0);
 		solo.enterText(0, ACCOUNT_NAME_2);
@@ -138,16 +135,14 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnText("Ok");
 		// assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		assertEquals(ACCOUNT_NAME_2, solo.getText(2).getText().toString());
-		assertEquals(ACCOUNT_START_SUM_FORMATED_ON_LIST_2, solo.getText(3)
-				.getText().toString());
+		assertEquals(ACCOUNT_START_SUM_FORMATED_ON_LIST_2, solo.getText(3).getText().toString());
 	}
 
 	public void deleteAccount(int originalCount) {
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Supprimer");
 		solo.clickOnButton("Oui");
-		assertEquals(originalCount - 1, solo.getCurrentListViews().get(0)
-				.getCount());
+		assertEquals(originalCount - 1, solo.getCurrentListViews().get(0).getCount());
 	}
 
 	public void testQuickAddStateOnHomeScreen() {
@@ -159,23 +154,18 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertFalse(solo.getButton(2).isEnabled());
 		printCurrentTextViews();
 		TextView v = solo.getText(4);
-		assertEquals(
-				getActivity().getString(
-						fr.geobert.radis.R.string.quickadd_target_no_account),
+		assertEquals(getActivity().getString(fr.geobert.radis.R.string.quickadd_target_no_account),
 				v.getText());
 		addAccount();
-		assertEquals(
-				getActivity().getString(
-						fr.geobert.radis.R.string.quickadd_target_to_configure),
-				v.getText());
+		assertEquals(getActivity()
+				.getString(fr.geobert.radis.R.string.quickadd_target_to_configure), v.getText());
 		solo.pressMenuItem(1);
 		solo.clickInList(2);
 		solo.clickInList(0);
 		solo.goBack();
 		assertEquals(
-				getActivity()
-						.getString(fr.geobert.radis.R.string.quickadd_target,
-								ACCOUNT_NAME), v.getText());
+				getActivity().getString(fr.geobert.radis.R.string.quickadd_target, ACCOUNT_NAME),
+				v.getText());
 		assertTrue(solo.getEditText(0).isEnabled());
 		assertTrue(solo.getEditText(1).isEnabled());
 		assertFalse(solo.getButton(2).isEnabled());
@@ -201,24 +191,19 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		// test labels and state
 		editAccount();
 		assertEquals(
-				getActivity().getString(
-						fr.geobert.radis.R.string.quickadd_target,
-						ACCOUNT_NAME_2), v.getText());
+				getActivity().getString(fr.geobert.radis.R.string.quickadd_target, ACCOUNT_NAME_2),
+				v.getText());
 
 		addAccount2();
 		deleteAccount(2);
-		assertEquals(
-				getActivity().getString(
-						fr.geobert.radis.R.string.quickadd_target_to_configure),
-				v.getText());
+		assertEquals(getActivity()
+				.getString(fr.geobert.radis.R.string.quickadd_target_to_configure), v.getText());
 
 		deleteAccount(1);
 		assertFalse(solo.getEditText(0).isEnabled());
 		assertFalse(solo.getEditText(1).isEnabled());
 		assertFalse(solo.getButton(2).isEnabled());
-		assertEquals(
-				getActivity().getString(
-						fr.geobert.radis.R.string.quickadd_target_no_account),
+		assertEquals(getActivity().getString(fr.geobert.radis.R.string.quickadd_target_no_account),
 				v.getText());
 	}
 
@@ -253,8 +238,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(7, OP_DESC);
 		solo.clickOnButton("Ok");
 		assertTrue(solo.getText(1).getText().toString().contains("= 990,00"));
-		assertTrue(solo.getText(4).getText().toString()
-				.equals(OP_AMOUNT_FORMATED));
+		assertTrue(solo.getText(4).getText().toString().equals(OP_AMOUNT_FORMATED));
 	}
 
 	public void addManyOps() {
@@ -273,8 +257,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	public void testEditOp() {
 		addManyOps();
-		solo.scrollUpList(0);
-		solo.clickLongInList(0);
+		solo.clickLongInList(5, 0);
 		solo.clickOnMenuItem("Modifier");
 		solo.clearEditText(4);
 		solo.enterText(4, "103");
@@ -295,7 +278,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 1 011,00"));
-		assertTrue(solo.getText(4).getText().toString().equals("10,50"));
+		printCurrentTextViews();
+		assertTrue(solo.getText(5).getText().toString().equals("10,50"));
 	}
 
 	/**
@@ -327,8 +311,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.pressMenuItem(0);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		solo.setDatePicker(0, today.get(Calendar.YEAR),
-				today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+		solo.setDatePicker(0, today.get(Calendar.YEAR), today.get(Calendar.MONTH),
+				today.get(Calendar.DAY_OF_MONTH));
 		solo.enterText(3, OP_TP);
 		solo.enterText(4, "9,50");
 		solo.enterText(5, OP_TAG);
@@ -363,8 +347,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
 		today.add(Calendar.MONTH, -2);
-		solo.setDatePicker(0, today.get(Calendar.YEAR),
-				today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+		solo.setDatePicker(0, today.get(Calendar.YEAR), today.get(Calendar.MONTH),
+				today.get(Calendar.DAY_OF_MONTH));
 		solo.enterText(3, OP_TP);
 		solo.enterText(4, "9,50");
 		solo.enterText(5, OP_TAG);
@@ -413,8 +397,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Créer");
 		solo.enterText(0, "ATest");
 		solo.clickOnButton("Ok");
-		assertNotNull(solo.getText(getActivity().getString(
-				fr.geobert.radis.R.string.item_exists)));
+		assertNotNull(solo.getText(getActivity().getString(fr.geobert.radis.R.string.item_exists)));
 	}
 
 	// issue 50 test
@@ -461,8 +444,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	private String getDateStr(Calendar cal) {
 		return String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)) + "/"
-				+ String.format("%02d", cal.get(Calendar.MONTH) + 1) + "/"
-				+ cal.get(Calendar.YEAR);
+				+ String.format("%02d", cal.get(Calendar.MONTH) + 1) + "/" + cal.get(Calendar.YEAR);
 	}
 
 	public void testProjectionFromOpList() {
@@ -472,10 +454,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		Tools.clearTimeOfCalendar(today);
 		today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
 		today.add(Calendar.MONTH, 3);
-		Log.d(TAG, "testProjectionFromOpList : " + getDateStr(today) + " VS " + solo.getButton(0).getText().toString());
-		
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains(getDateStr(today)));
+		Log.d(TAG, "testProjectionFromOpList : " + getDateStr(today) + " VS "
+				+ solo.getButton(0).getText().toString());
+
+		assertTrue(solo.getButton(0).getText().toString().contains(getDateStr(today)));
 		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
 
@@ -490,10 +472,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 		today.add(Calendar.MONTH, 1);
 		Log.d(TAG, "1DATE : " + getDateStr(today));
-		Log.d(TAG, "1DATE displayed : "
-				+ solo.getButton(0).getText().toString());
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains(getDateStr(today)));
+		Log.d(TAG, "1DATE displayed : " + solo.getButton(0).getText().toString());
+		assertTrue(solo.getButton(0).getText().toString().contains(getDateStr(today)));
 		assertTrue(solo.getButton(0).getText().toString().contains("= 996,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
 
@@ -509,13 +489,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 
 		Log.d(TAG, "2DATE : " + getDateStr(today));
-		Log.d(TAG, "2DATE displayed : "
-				+ solo.getButton(0).getText().toString());
-		Log.d(TAG, "solo.getButton(0).getText() : "
-				+ solo.getButton(0).getText());
+		Log.d(TAG, "2DATE displayed : " + solo.getButton(0).getText().toString());
+		Log.d(TAG, "solo.getButton(0).getText() : " + solo.getButton(0).getText());
 
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains(getDateStr(today)));
+		assertTrue(solo.getButton(0).getText().toString().contains(getDateStr(today)));
 		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
 
@@ -535,10 +512,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 
 		Log.d(TAG, "0DATE : " + getDateStr(today));
-		Log.d(TAG, "0DATE displayed : "
-				+ solo.getButton(0).getText().toString());
-		Log.d(TAG, "solo.getButton(0).getText() : "
-				+ solo.getButton(0).getText());
+		Log.d(TAG, "0DATE displayed : " + solo.getButton(0).getText().toString());
+		Log.d(TAG, "solo.getButton(0).getText() : " + solo.getButton(0).getText());
 
 		assertTrue(solo.getButton(0).getText().toString().contains("= 994,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
@@ -559,7 +534,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		Tools.clearTimeOfCalendar(today);
 		solo.enterText(2, Integer.toString(Math.min(today.get(Calendar.DAY_OF_MONTH), 28)));
 		solo.clickOnButton("Ok");
-		
+
 		assertTrue(solo.getText(3).getText().toString().contains("996,50"));
 
 		// test mode 2
@@ -569,9 +544,11 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getEditText(2).isEnabled());
 		today.set(Calendar.DAY_OF_MONTH, 28);
 		today.add(Calendar.MONTH, +2);
-		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
-				+ "/" + Integer.toString(today.get(Calendar.MONTH) + 1) + "/"
-				+ Integer.toString(today.get(Calendar.YEAR)));
+		solo.enterText(
+				2,
+				Integer.toString(today.get(Calendar.DAY_OF_MONTH)) + "/"
+						+ Integer.toString(today.get(Calendar.MONTH) + 1) + "/"
+						+ Integer.toString(today.get(Calendar.YEAR)));
 		solo.clickOnButton("Ok");
 		assertTrue(solo.getText(3).getText().toString().contains("995,50"));
 
@@ -633,7 +610,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
 		Log.d(TAG, "editOpMode1 after one edit " + solo.getCurrentListViews().get(0).getCount());
-		
+
 		solo.clickInList(3);
 		solo.clickLongInList(3);
 		solo.clickOnMenuItem("Modifier");
@@ -644,8 +621,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(0);
 		sleep(15000);
 		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1);
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains("= 1 001,50"));
+		assertTrue(solo.getButton(0).getText().toString().contains("= 1 001,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 003,50"));
 	}
 
@@ -660,9 +636,11 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
 		today.add(Calendar.DAY_OF_MONTH, 1);
-		solo.enterText(2, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
-				+ "/" + Integer.toString(today.get(Calendar.MONTH) + 1) + "/"
-				+ Integer.toString(today.get(Calendar.YEAR)));
+		solo.enterText(
+				2,
+				Integer.toString(today.get(Calendar.DAY_OF_MONTH)) + "/"
+						+ Integer.toString(today.get(Calendar.MONTH) + 1) + "/"
+						+ Integer.toString(today.get(Calendar.YEAR)));
 		solo.clickOnButton("Ok");
 		solo.clickInList(0);
 		Log.d(TAG, "addOpMode2 before add " + solo.getCurrentListViews().get(0).getCount());
@@ -712,8 +690,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(0);
 		Log.d(TAG, "editOpMode2 after two edit " + solo.getCurrentListViews().get(0).getCount());
 		assertEquals(3, solo.getCurrentListViews().get(0).getCount() - 1);
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains("= 1 001,50"));
+		assertTrue(solo.getButton(0).getText().toString().contains("= 1 001,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 003,50"));
 	}
 
@@ -721,8 +698,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Supprimer");
 		solo.clickOnButton("Oui");
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains("= 1 001,50"));
+		assertTrue(solo.getButton(0).getText().toString().contains("= 1 001,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 001,50"));
 		solo.clickLongInList(2);
 		solo.clickOnMenuItem("Supprimer");
@@ -740,7 +716,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		editOpMode2();
 		delOps();
 	}
-	
+
 	// test for issue 95
 	public void DelOpMode1_2() {
 		setUpOpTest();
@@ -753,7 +729,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 			solo.enterText(7, OP_DESC);
 			solo.clickOnButton("Ok");
 		}
-		Log.d(TAG, "testDelOpMode1_2 sum at selection after first adds: " + solo.getText(1).getText().toString());
+		Log.d(TAG, "testDelOpMode1_2 sum at selection after first adds: "
+				+ solo.getText(1).getText().toString());
 		assertTrue(solo.getText(1).getText().toString().contains("= 900,50"));
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
@@ -767,24 +744,23 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		Log.d(TAG, "testDelOpMode1_2 sum at selection : " + solo.getText(0).getText().toString());
 		Log.d(TAG, "testDelOpMode1_2 sum at proj : " + solo.getButton(0).getText().toString());
 		assertTrue(solo.getText(0).getText().toString().contains("= 980,50"));
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains("= 890,50"));
+		assertTrue(solo.getButton(0).getText().toString().contains("= 890,50"));
 		solo.clickInList(9);
-		
+
 		Log.d(TAG, "testDelOpMode1_2 sum at selection 2 : " + solo.getText(0).getText().toString());
 		Log.d(TAG, "testDelOpMode1_2 sum at proj 2 : " + solo.getButton(0).getText().toString());
 		assertTrue(solo.getText(0).getText().toString().contains("= 990,50"));
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains("= 890,50"));
+		assertTrue(solo.getButton(0).getText().toString().contains("= 890,50"));
 		solo.clickLongInList(9);
 		sleep(1000);
 		solo.clickOnMenuItem("Supprimer");
 		solo.clickOnButton("Oui");
-		
-		Log.d(TAG, "testDelOpMode1_2 sum at selection after del : " + solo.getText(0).getText().toString());
-		Log.d(TAG, "testDelOpMode1_2 sum at proj after del : " + solo.getButton(0).getText().toString());
-		assertTrue(solo.getButton(0).getText().toString()
-				.contains("= 891,50"));
+
+		Log.d(TAG, "testDelOpMode1_2 sum at selection after del : "
+				+ solo.getText(0).getText().toString());
+		Log.d(TAG, "testDelOpMode1_2 sum at proj after del : "
+				+ solo.getButton(0).getText().toString());
+		assertTrue(solo.getButton(0).getText().toString().contains("= 891,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 991,50"));
 	}
 }
