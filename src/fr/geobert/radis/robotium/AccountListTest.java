@@ -330,12 +330,14 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(6, OP_MODE);
 		solo.enterText(7, OP_DESC);
 		solo.clickOnButton("Ok");
+		solo.waitForView(ListView.class);
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		solo.goBack();
 		solo.clickInList(0);
 		sleep(1000);
 		// -1 is for "get more ops" line
 //		assertEquals(1, solo.getCurrentListViews().get(0).getCount() - 1);
+		Log.d(TAG, "solo.getText(1).getText().toString() : " + solo.getText(1).getText().toString());
 		assertTrue(solo.getText(1).getText().toString().contains("= 991,00"));
 	}
 
