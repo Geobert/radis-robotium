@@ -15,6 +15,7 @@ import com.jayway.android.robotium.solo.Solo;
 
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.DBPrefsManager;
+import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -127,6 +128,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(1, ACCOUNT_START_SUM_2);
 		solo.enterText(4, ACCOUNT_DESC_2);
 		solo.clickOnText("Ok");
+		solo.waitForView(ListView.class);
 		assertEquals(2, solo.getCurrentListViews().get(0).getCount());
 	}
 
@@ -157,7 +159,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	}
 
 	public void testQuickAddStateOnHomeScreen() {
-		CommonDbAdapter.getInstance(getActivity()).open();
+		CommonDbAdapter.getInstance(getActivity());
 		DBPrefsManager.getInstance(getActivity()).resetAll();
 
 		assertFalse(solo.getEditText(0).isEnabled());
@@ -319,7 +321,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	public void addScheduleOp() {
 		setUpSchOp();
-		solo.pressMenuItem(0);
+		solo.clickOnImageButton(0);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
 		solo.setDatePicker(0, today.get(Calendar.YEAR), today.get(Calendar.MONTH),
@@ -352,11 +354,16 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 993,00"));
 	}
+	
+//	public void testDelFutureOccurences() {
+//		setUpSchOp();
+//		solo.clickOnImageButton(0);
+//	}
 
 	// issue 59 test
 	public void testDeleteAllOccurences() {
 		setUpSchOp();
-		solo.pressMenuItem(0);
+		solo.clickOnImageButton(0);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
 		today.add(Calendar.MONTH, -2);
@@ -381,7 +388,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.pressMenuItem(1);
 		solo.clickLongInList(0);
 		solo.clickOnMenuItem("Supprimer");
-		solo.clickOnButton("Tout");
+		solo.clickOnButton("Toutes");
 		solo.goBack();
 
 		// -1 is for "get more ops" line
@@ -457,8 +464,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	}
 
 	private String getDateStr(Calendar cal) {
-		return String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)) + "/"
-				+ String.format("%02d", cal.get(Calendar.MONTH) + 1) + "/" + cal.get(Calendar.YEAR);
+		return Formater.getFullDateFormater(getActivity()).format(cal.getTime());
 	}
 
 	public void testProjectionFromOpList() {
