@@ -17,6 +17,7 @@ import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.R;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class AccountListTest extends ActivityInstrumentationTestCase2 {
@@ -346,19 +347,46 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	public void testEditScheduledOp() {
 		addScheduleOp();
 		solo.clickLongInList(0);
-		solo.clickOnMenuItem("Modifier");
+		solo.clickOnMenuItem(getString(R.string.edit));
 		solo.clearEditText(4);
 		solo.enterText(4, "-7,50");
-		solo.clickOnButton("Ok");
-		solo.clickOnButton("Mettre à jour");
+		solo.clickOnButton(getString(R.string.ok));
+		solo.clickOnButton(getString(R.string.update));
 		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 993,00"));
 	}
 	
-//	public void testDelFutureOccurences() {
-//		setUpSchOp();
-//		solo.clickOnImageButton(0);
-//	}
+	public void testDelFutureOccurences() {
+		setUpSchOp();
+		solo.clickOnImageButton(0);
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		today.add(Calendar.DAY_OF_MONTH, -14);
+		solo.setDatePicker(0, today.get(Calendar.YEAR), today.get(Calendar.MONTH),
+				today.get(Calendar.DAY_OF_MONTH));
+		solo.enterText(3, OP_TP);
+		solo.enterText(4, "1,00");
+		solo.enterText(5, OP_TAG);
+		solo.enterText(6, OP_MODE);
+		solo.enterText(7, OP_DESC);
+		solo.clickOnButton(getString(R.string.scheduling));
+		solo.pressSpinnerItem(1, -1);
+		solo.clickOnButton(getString(R.string.ok));
+		solo.waitForView(ListView.class);
+		solo.goBack();
+		solo.clickInList(0);
+		solo.waitForActivity("OperationList");
+		int nbOps = solo.getCurrentListViews().get(0).getCount();
+		solo.clickInList(nbOps);
+		sleep(1000);
+		nbOps = solo.getCurrentListViews().get(0).getCount();
+		solo.clickLongInList(nbOps - 3);
+		solo.clickOnMenuItem(getString(R.string.delete));
+		solo.clickOnButton(getString(R.string.del_all_following));
+		solo.waitForView(ListView.class);
+		solo.clickInList(solo.getCurrentListViews().get(0).getCount());
+		assertEquals(3, solo.getCurrentListViews().get(0).getCount());
+	}
 
 	// issue 59 test
 	public void testDeleteAllOccurences() {
@@ -375,7 +403,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(6, OP_MODE);
 		solo.enterText(7, OP_DESC);
 		solo.clickOnButton("Ok");
-		sleep(1000);
+		solo.waitForView(ListView.class);
 		solo.goBack();
 		solo.clickInList(0);
 		solo.clickInList(2);
@@ -461,6 +489,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 			addOpOnDate(today);
 			today.add(Calendar.MONTH, +1);
 		}
+	}
+	
+	private String getString(final int id) {
+		return getActivity().getString(id);
 	}
 
 	private String getDateStr(Calendar cal) {
