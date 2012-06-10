@@ -121,6 +121,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(1, ACCOUNT_START_SUM);
 		solo.enterText(4, ACCOUNT_DESC);
 		solo.clickOnText("Ok");
+		solo.waitForView(ListView.class);
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		assertEquals(ACCOUNT_NAME, solo.getText(2).getText().toString());
 		assertEquals(ACCOUNT_START_SUM_FORMATED_ON_LIST, solo.getText(3)
@@ -399,13 +400,14 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickInList(nbOps);
 		sleep(1000);
 		nbOps = solo.getCurrentListViews().get(0).getCount();
-		Log.d(TAG, "interface text : " + solo.getText(2).getText().toString()
+		printCurrentTextViews();
+		Log.d(TAG, "interface text : " + solo.getText(1).getText().toString()
 				+ " / " + Formater.getSumFormater().format(1000.5 - nbOps + 1));
-		assertTrue(solo.getText(2).getText().toString()
+		assertTrue(solo.getText(1).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.5 - nbOps + 1)));
 		return nbOps;
 	}
-	
+
 	public void testDelFutureOccurences() {
 		int nbOps = setupDelOccFromOps();
 		solo.clickLongInList(nbOps - 3);
@@ -417,7 +419,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getText(2).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.5 - 2)));
 	}
-	
+
 	public void testDelAllOccurencesFromOps() {
 		int nbOps = setupDelOccFromOps();
 		solo.clickLongInList(nbOps - 3);
@@ -430,6 +432,29 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		printCurrentTextViews();
 		assertTrue(solo.getText(3).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.5)));
+	}
+
+	// issue 112
+	public void testCancelSchEdition() {
+		Picker picker = new Picker(solo);
+		setupDelOccFromOps();
+		solo.pressMenuItem(1);
+		solo.waitForActivity("ScheduledOpList");
+		final CharSequence date = solo.getCurrentTextViews(null).get(2).getText(); 
+		solo.clickInList(0);
+		solo.waitForActivity("ScheduledOperationEditor");
+		GregorianCalendar today = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(today);
+		today.add(Calendar.MONTH, -2);
+		picker.clickOnDatePicker(today.get(Calendar.MONTH) + 1,
+				today.get(Calendar.DAY_OF_MONTH), today.get(Calendar.YEAR));
+		solo.clickOnButton(getString(R.string.ok));
+		solo.clickOnButton(getString(R.string.cancel));
+		solo.clickOnButton(getString(R.string.cancel));
+		solo.waitForActivity("ScheduledOpList");
+		printCurrentTextViews();
+		Log.d(TAG, "before date : " + date);
+		assertEquals(date, solo.getCurrentTextViews(null).get(2).getText());
 	}
 
 	// issue 59 test
