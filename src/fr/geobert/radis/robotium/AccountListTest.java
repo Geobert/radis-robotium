@@ -320,12 +320,12 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	 */
 
 	public void testNoAccount() {
-		assertFalse(solo.getButton("Échéancier").isEnabled());
+		assertFalse(solo.getButton(getString(R.string.scheduled_ops)).isEnabled());
 	}
 
 	private void setUpSchOp() {
 		solo.pressMenuItem(1);
-		solo.clickOnText("Date d'insertion");
+		solo.clickOnText(getString(R.string.prefs_insertion_date_label));
 		solo.clearEditText(0);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
@@ -334,8 +334,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 		solo.goBack();
 		addAccount();
-		assertTrue(solo.getButton("Échéancier").isEnabled());
-		solo.clickOnButton("Échéancier");
+		assertTrue(solo.getButton(getString(R.string.scheduled_ops)).isEnabled());
+		solo.clickOnButton(getString(R.string.scheduled_ops));
 		assertEquals(0, solo.getCurrentListViews().get(0).getCount());
 	}
 
@@ -398,9 +398,11 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.waitForActivity("OperationList");
 		int nbOps = solo.getCurrentListViews().get(0).getCount();
 		solo.clickInList(nbOps);
-		sleep(1000);
+		sleep(5000);
 		nbOps = solo.getCurrentListViews().get(0).getCount();
 		printCurrentTextViews();
+		sleep(15000);
+		Log.d(TAG, "nbOps : " + nbOps);
 		Log.d(TAG, "interface text : " + solo.getText(1).getText().toString()
 				+ " / " + Formater.getSumFormater().format(1000.5 - nbOps + 1));
 		assertTrue(solo.getText(1).getText().toString()
@@ -410,13 +412,17 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	public void testDelFutureOccurences() {
 		int nbOps = setupDelOccFromOps();
+		Log.d(TAG, "mbOPS : " + nbOps);
 		solo.clickLongInList(nbOps - 3);
 		solo.clickOnMenuItem(getString(R.string.delete));
 		solo.clickOnButton(getString(R.string.del_all_following));
 		solo.waitForView(ListView.class);
 		solo.clickInList(solo.getCurrentListViews().get(0).getCount());
-		assertEquals(3, solo.getCurrentListViews().get(0).getCount());
-		assertTrue(solo.getText(2).getText().toString()
+		assertEquals(2, solo.getCurrentListViews().get(0).getCount());
+		printCurrentTextViews();
+		Log.d(TAG, "interface text : " + solo.getText(1).getText().toString()
+				+ " / " + Formater.getSumFormater().format(1000.5 - 2));
+		assertTrue(solo.getText(1).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.5 - 2)));
 	}
 
