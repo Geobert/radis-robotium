@@ -401,8 +401,6 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		sleep(5000);
 		nbOps = solo.getCurrentListViews().get(0).getCount();
 		printCurrentTextViews();
-		sleep(15000);
-		Log.d(TAG, "nbOps : " + nbOps);
 		Log.d(TAG, "interface text : " + solo.getText(1).getText().toString()
 				+ " / " + Formater.getSumFormater().format(1000.5 - nbOps + 1));
 		assertTrue(solo.getText(1).getText().toString()
@@ -418,7 +416,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton(getString(R.string.del_all_following));
 		solo.waitForView(ListView.class);
 		solo.clickInList(solo.getCurrentListViews().get(0).getCount());
-		assertEquals(2, solo.getCurrentListViews().get(0).getCount());
+		assertEquals(2, solo.getCurrentListViews().get(0).getCount() - 1);
 		printCurrentTextViews();
 		Log.d(TAG, "interface text : " + solo.getText(1).getText().toString()
 				+ " / " + Formater.getSumFormater().format(1000.5 - 2));
