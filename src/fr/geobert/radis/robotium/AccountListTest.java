@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import org.acra.sender.GoogleFormSender;
-
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.widget.Button;
@@ -15,11 +13,11 @@ import android.widget.TextView;
 
 import com.jayway.android.robotium.solo.Solo;
 
+import fr.geobert.radis.R;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
-import fr.geobert.radis.R;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class AccountListTest extends ActivityInstrumentationTestCase2 {
@@ -40,6 +38,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	public static final String ACCOUNT_START_SUM_FORMATED_ON_LIST_2 = "2 000,50 €";
 	public static final String ACCOUNT_DESC_2 = "Test Description 2";
 
+	// operation form constants
+	final int idx_category_more_btn = 3;
+	
+	
 	private static Class<?> launcherActivityClass;
 	static {
 		try {
@@ -351,6 +353,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(5, OP_TAG);
 		solo.enterText(6, OP_MODE);
 		solo.enterText(7, OP_DESC);
+		solo.clickOnButton(getString(R.string.scheduling));
+		solo.pressSpinnerItem(0, 1);
 		solo.clickOnButton("Ok");
 		solo.waitForView(ListView.class);
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
@@ -390,6 +394,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(6, OP_MODE);
 		solo.enterText(7, OP_DESC);
 		solo.clickOnButton(getString(R.string.scheduling));
+		solo.pressSpinnerItem(0, 1);
 		solo.pressSpinnerItem(1, -1);
 		solo.clickOnButton(getString(R.string.ok));
 		solo.waitForView(ListView.class);
@@ -475,6 +480,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(5, OP_TAG);
 		solo.enterText(6, OP_MODE);
 		solo.enterText(7, OP_DESC);
+		solo.clickOnButton(getString(R.string.scheduling));
+		solo.pressSpinnerItem(0, 1);
 		solo.clickOnButton("Ok");
 		solo.waitForView(ListView.class);
 		solo.goBack();
@@ -501,20 +508,20 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	 */
 
 	// test adding info with different casing
-	public void testAddExistingInfo() {
+	public void testAddExistingInfo() {		
 		setUpOpTest();
 		solo.pressMenuItem(0);
 		solo.enterText(3, OP_TP);
 		for (int i = 0; i < OP_AMOUNT.length(); ++i) {
 			solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
 		}
-		solo.clickOnButton(2);
+		solo.clickOnButton(idx_category_more_btn);
 		solo.clickOnButton("Créer");
 		solo.enterText(0, "Atest");
 		solo.clickOnButton("Ok");
 		sleep(1000);
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
-		solo.clickOnButton(2);
+		solo.clickOnButton(idx_category_more_btn);
 		solo.clickOnButton("Créer");
 		solo.enterText(0, "ATest");
 		solo.clickOnButton("Ok");
@@ -530,7 +537,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		for (int i = 0; i < OP_AMOUNT.length(); ++i) {
 			solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
 		}
-		solo.clickOnButton(2);
+		solo.clickOnButton(idx_category_more_btn);
 		solo.clickOnButton("Créer");
 		solo.enterText(0, "Atest");
 		solo.clickOnButton("Ok");
@@ -538,7 +545,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton("Ok");
 		solo.clickOnButton("Ok");
 		solo.pressMenuItem(0);
-		solo.clickOnButton(2);
+		solo.clickOnButton(idx_category_more_btn);
 		sleep(1000);
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 	}
@@ -919,4 +926,12 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getButton(0).getText().toString().contains("= 891,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 991,50"));
 	}
+	
+	// test transfert
+	
+	/*public void testSimpleTransfert() {
+		addAccount();
+		addAccount2();
+		
+	}*/
 }
