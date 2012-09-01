@@ -5,19 +5,21 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.content.Context;
+import android.sax.StartElementListener;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.jayway.android.robotium.solo.Solo;
 
+import fr.geobert.radis.AccountList;
 import fr.geobert.radis.R;
-import fr.geobert.radis.db.DbContentProvider;
-import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
@@ -49,6 +51,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	private static Class<?> launcherActivityClass;
 	static {
+		AccountList.ROBOTIUM_MODE = true;
 		try {
 			launcherActivityClass = Class
 					.forName(LAUNCHER_ACTIVITY_FULL_CLASSNAME);
@@ -64,8 +67,13 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	protected Solo solo;
 
 	protected void trashDb() {
+		Log.d("RadisRobotium", "GET ACTIVITY : " + getActivity().getClass().toString());
 //		DBPrefsManager.getInstance(getActivity()).resetAll();
-		DbContentProvider.deleteDatabase(getActivity());
+//		DbContentProvider.deleteDatabase(getActivity());
+//		ContentProviderClient client = getActivity().getContentResolver().acquireContentProviderClient("fr.geobert.radis.db");
+//		DbContentProvider provider = (DbContentProvider) client.getLocalContentProvider();
+//		provider.deleteDatabase(getActivity());
+//		client.release();
 	}
 
 //	protected void createDb() {
@@ -114,25 +122,17 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 	@Override
 	protected void setUp() throws Exception {
-		Log.d("RadisRobotium", "SET UP");
-		trashDb();
-//		createDb();
 		solo = new Solo(getInstrumentation(), getActivity());
 
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-		Log.d("RadisRobotium", "TEAR DOWN");
 		try {
 			solo.finishOpenedActivities();
-//			trashDb();
-//			createDb();
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-//		getActivity().finish();
-//		super.tearDown();
 	}
 
 	public void addAccount() {
@@ -291,6 +291,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		addAccount();
 		solo.clickInList(0);
 		solo.waitForActivity("OperationList");
+		solo.waitForView(ListView.class);
 	}
 
 	public void addOp() {
@@ -364,7 +365,9 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	}
 
 	private void setUpSchOp() {
+		solo.waitForDialogToClose(5000);
 		solo.pressMenuItem(1);
+		solo.waitForActivity("RadisConfiguration");
 		solo.clickOnText(getString(R.string.prefs_insertion_date_label));
 		solo.clearEditText(0);
 		GregorianCalendar today = new GregorianCalendar();
@@ -446,8 +449,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.goBack();
 		solo.clickInList(0);
 		solo.waitForActivity("OperationList");
+		solo.waitForView(ListView.class);
+		solo.waitForDialogToClose(5000);
 		int nbOps = solo.getCurrentListViews().get(0).getCount();
-		solo.clickInList(nbOps);
+		solo.clickOnText(getString(R.string.get_more_op));
 		sleep(5000);
 		nbOps = solo.getCurrentListViews().get(0).getCount();
 		printCurrentTextViews();
@@ -494,10 +499,13 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		setupDelOccFromOps();
 		solo.pressMenuItem(1);
 		solo.waitForActivity("ScheduledOpList");
+		solo.waitForView(ListView.class);
+		solo.waitForDialogToClose(5000);
 		final CharSequence date = solo.getCurrentTextViews(null).get(2)
 				.getText();
 		solo.clickInList(0);
 		solo.waitForActivity("ScheduledOperationEditor");
+		solo.waitForDialogToClose(5000);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
 		today.add(Calendar.MONTH, -2);
@@ -507,6 +515,8 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnButton(getString(R.string.cancel));
 		solo.clickOnButton(getString(R.string.cancel));
 		solo.waitForActivity("ScheduledOpList");
+		solo.waitForView(ListView.class);
+		solo.waitForDialogToClose(4000);
 		printCurrentTextViews();
 		Log.d(TAG, "before date : " + date);
 		assertEquals(date, solo.getCurrentTextViews(null).get(2).getText());
@@ -588,13 +598,21 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 			solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
 		}
 		solo.clickOnImageButton(idx_category_more_btn);
+		solo.waitForText(getString(R.string.create));
 		solo.clickOnButton(getString(R.string.create));
 		solo.enterText(0, "Atest");
 		solo.clickOnButton(getString(R.string.ok));
+		solo.waitForView(ListView.class);
 		solo.clickInList(0);
+		sleep(500);
 		solo.clickOnButton(getString(R.string.ok));
+		solo.waitForDialogToClose(500);
 		solo.clickOnButton(getString(R.string.ok));
+		solo.waitForActivity("OperationList");
+		solo.waitForView(ListView.class);
 		solo.pressMenuItem(0);
+		solo.waitForActivity("OperationEditor");
+		solo.waitForView(ImageButton.class);
 		solo.clickOnImageButton(idx_category_more_btn);
 		solo.waitForView(ListView.class);
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
@@ -608,6 +626,9 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(3, OP_TP);
 		solo.enterText(4, "1");
 		solo.clickOnButton(getString(R.string.ok));
+		solo.waitForActivity("OperationList");
+		solo.waitForView(ListView.class);
+		solo.waitForDialogToClose(4000);
 	}
 
 	private void setUpProjTest1() {
@@ -785,11 +806,14 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(3, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
 		solo.clickOnButton(getString(R.string.ok));
 		solo.clickInList(0);
+		solo.waitForActivity("OperationList");
+		printCurrentTextViews();
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
 		Log.d(TAG, "addOpMode1 before add "
 				+ solo.getCurrentListViews().get(0).getCount());
 		today.add(Calendar.DAY_OF_MONTH, -1);
 		addOpOnDate(today);
+		printCurrentTextViews();
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
 		Log.d(TAG, "addOpMode1 after one add "
@@ -798,6 +822,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		today.add(Calendar.MONTH, +1);
 		addOpOnDate(today);
 		solo.clickInList(0);
+		printCurrentTextViews();
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 998,50"));
 		Log.d(TAG, "addOpMode1 after two add "
@@ -808,6 +833,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		// Log.d(TAG, "addOpMode1 after three add " +
 		// solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
+		printCurrentButtons();
 		assertTrue(solo.getButton(0).getText().toString().contains("= 998,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 997,50"));
 	}
@@ -867,6 +893,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		addOpOnDate(today);
 		// Log.d(TAG, "addOpMode2 after one add " +
 		// solo.getCurrentListViews().get(0).getCount());
+		printCurrentTextViews();
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
 
@@ -921,7 +948,9 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickLongInList(0);
 		clickOnMenuItem(getString(R.string.delete));
 		solo.clickOnButton(getString(R.string.yes));
+		solo.waitForDialogToClose(4000);
 		String sum = Formater.getSumFormater().format(1001.50);
+		printCurrentTextViews();
 		assertTrue(solo.getButton(0).getText().toString().contains(sum));
 		assertTrue(solo.getText(0).getText().toString().contains(sum));
 		solo.clickLongInList(2);
@@ -1086,7 +1115,9 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	}
 	
 	private void setUpSchTransOp() {
+		solo.waitForDialogToClose(4000);
 		solo.pressMenuItem(1);
+		solo.waitForActivity("RadisConfiguration");
 		solo.clickOnText(getString(R.string.prefs_insertion_date_label));
 		solo.clearEditText(0);
 		GregorianCalendar today = new GregorianCalendar();
@@ -1162,6 +1193,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 				today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
 
 		solo.clickOnCheckBox(0);
+		solo.waitForView(Spinner.class);
 		solo.pressSpinnerItem(0, 1);
 		solo.pressSpinnerItem(1, 2);
 		for (int i = 0; i < OP_AMOUNT.length(); ++i) {
@@ -1172,17 +1204,22 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.enterText(6, OP_DESC);
 		while (solo.scrollUp());
 		solo.clickOnButton(getString(R.string.scheduling));
+		solo.waitForText(getString(R.string.account));
 		solo.pressSpinnerItem(1, -1);
 		solo.clickOnButton(getString(R.string.ok));
+		solo.waitForActivity("ScheduledOpList");
+		solo.waitForView(ListView.class);
 	}
 
 	public void makeSchTransfertHebdoFromAccList() {
 		setUpSchTransOp();
-
 		solo.clickOnButton(getString(R.string.scheduled_ops));
+		solo.waitForActivity("ScheduledOpList");
 		addSchTransfertHebdo();
 		solo.goBack();
 		solo.waitForActivity("AccountList");
+		solo.waitForView(ListView.class);
+		solo.waitForDialogToClose(4000);
 		printCurrentTextViews();
 		double sum = 8 * 10.50;
 		assertTrue(solo.getText(3).getText().toString()
@@ -1218,9 +1255,12 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		clickOnMenuItem(getString(R.string.delete));
 		solo.clickOnText(getString(R.string.del_all_occurrences));
 		sleep(1000);
+		printCurrentTextViews();
+		String startSum = Formater.getSumFormater().format(1000.50);
+		assertTrue(solo.getText(0).getText().toString().contains(startSum));
+		assertTrue(solo.getText(1).getText().toString().contains(startSum));
 		solo.goBack();
 		solo.waitForActivity("AccountList");
-		printCurrentTextViews();
 		assertTrue(solo.getText(3).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.50)));
 		assertTrue(solo.getText(6).getText().toString()
@@ -1252,11 +1292,15 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		makeSchTransfertHebdoFromAccList();
 		solo.clickOnText(getString(R.string.scheduled_ops));
 		solo.waitForActivity("ScheduledOpList");
+		solo.waitForView(ListView.class);
 		solo.clickLongInList(0);
-		solo.clickOnText(getString(R.string.delete));
-		solo.clickOnText(getString(R.string.del_all_occurrences));
+		clickOnMenuItem(getString(R.string.delete));
+		clickOnMenuItem(getString(R.string.del_all_occurrences));
+		sleep(1000);
 		solo.goBack();
 		solo.waitForActivity("AccountList");
+		solo.waitForView(ListView.class);
+		solo.waitForDialogToClose(5000);
 		printCurrentTextViews();
 		assertTrue(solo.getText(3).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.50)));

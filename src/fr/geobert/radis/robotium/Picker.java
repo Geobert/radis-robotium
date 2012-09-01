@@ -75,12 +75,13 @@ public class Picker {
      */
     public void clickOnDatePicker(int monthOfYear, int dayOfMonth, int year) {
         //solo.waitForText(SET);
-    	Log.d("Robotium", String.format("%d/%d/%d", monthOfYear, dayOfMonth, year));
+    	solo.waitForView(DatePicker.class);
+    	Log.d("RadisRobotium", String.format("%d/%d/%d", monthOfYear, dayOfMonth, year));
         DatePicker picker = getDatePicker();
         if (picker == null) return;
 
         int monthClicks = calculateClicks(picker.getMonth(), monthOfYear, 12);
-        Log.d("Robotium", "monthClicks :" + monthClicks);
+        Log.d("RadisRobotium", "monthClicks :" + monthClicks);
         clickOnPickerButton(monthClicks, MONTH_PLUS_BUTTON_INDEX, MONTH_MINUS_BUTTON_INDEX);
 
         int yearClicks = calculateClicks(picker.getYear(), year, 9999);
