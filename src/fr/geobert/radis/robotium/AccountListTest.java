@@ -129,7 +129,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 	}
 
 	public void waitForListView() {
-		waitForListView();
+		solo.waitForView(ListView.class);
 	}
 
 	public void scrollUp() {
@@ -445,9 +445,10 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 		solo.goBack();
 		solo.clickInList(0);
-		sleep(1000);
+		solo.waitForActivity(ACC_LIST);
+		waitForListView();
 		// -1 is for "get more ops" line
-		// assertEquals(1, solo.getCurrentListViews().get(0).getCount() - 1);
+		// assertEquals(1, solo.getCurrentListViews().get(0).getCount() - 1);		
 		Log.d(TAG, "solo.getText(1).getText().toString() : "
 				+ solo.getText(1).getText().toString());
 		assertTrue(solo.getText(1).getText().toString().contains("= 991,00"));
@@ -458,10 +459,14 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		addScheduleOp();
 		solo.clickLongInList(0);
 		clickOnMenuItem(getString(R.string.edit));
+		solo.waitForActivity(OP_EDITOR);
 		solo.clearEditText(4);
 		solo.enterText(4, "-7,50");
 		solo.clickOnButton(getString(R.string.ok));
+		solo.waitForText(getString(R.string.update));
 		solo.clickOnButton(getString(R.string.update));
+		solo.waitForActivity(OP_LIST);
+		waitForListView();
 		printCurrentTextViews();
 		assertTrue(solo.getText(1).getText().toString().contains("= 993,00"));
 	}
@@ -664,13 +669,13 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertEquals(1, solo.getCurrentListViews().get(0).getCount());
 	}
 
-	private void addOpOnDate(GregorianCalendar t) {
+	private void addOpOnDate(GregorianCalendar t, int idx) {
 		solo.pressMenuItem(0);
 		solo.waitForActivity(OP_EDITOR);
 		solo.waitForView(DatePicker.class);
 		solo.setDatePicker(0, t.get(Calendar.YEAR), t.get(Calendar.MONTH),
 				t.get(Calendar.DAY_OF_MONTH));
-		solo.enterText(3, OP_TP);
+		solo.enterText(3, OP_TP + "/" + idx);
 		solo.enterText(4, "1");
 		solo.clickOnButton(getString(R.string.ok));
 		solo.waitForActivity(OP_LIST);
@@ -689,7 +694,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 				Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
 		today.add(Calendar.MONTH, -2);
 		for (int i = 0; i < 6; ++i) {
-			addOpOnDate(today);
+			addOpOnDate(today, i);
 			today.add(Calendar.MONTH, +1);
 		}
 	}
@@ -881,7 +886,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		Log.d(TAG, "addOpMode1 before add "
 				+ solo.getCurrentListViews().get(0).getCount());
 		today.add(Calendar.DAY_OF_MONTH, -1);
-		addOpOnDate(today);
+		addOpOnDate(today, 0);
 		printCurrentTextViews();
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
 		assertTrue(solo.getText(0).getText().toString().contains("= 999,50"));
@@ -889,7 +894,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 				+ solo.getCurrentListViews().get(0).getCount());
 		// add op after X
 		today.add(Calendar.MONTH, +1);
-		addOpOnDate(today);
+		addOpOnDate(today, 1);
 		solo.clickInList(0);
 		printCurrentTextViews();
 		assertTrue(solo.getButton(0).getText().toString().contains("= 999,50"));
@@ -898,7 +903,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 				+ solo.getCurrentListViews().get(0).getCount());
 		// add op before X of next month, should update the current sum
 		today.add(Calendar.MONTH, -2);
-		addOpOnDate(today);
+		addOpOnDate(today, 2);
 		// Log.d(TAG, "addOpMode1 after three add " +
 		// solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
@@ -961,7 +966,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		assertTrue(solo.getText(0).getText().toString().contains("= 1 000,50"));
 
 		today.add(Calendar.DAY_OF_MONTH, -1);
-		addOpOnDate(today);
+		addOpOnDate(today, 0);
 		// Log.d(TAG, "addOpMode2 after one add " +
 		// solo.getCurrentListViews().get(0).getCount());
 		printCurrentTextViews();
@@ -970,7 +975,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 		// add op after X
 		today.add(Calendar.MONTH, +1);
-		addOpOnDate(today);
+		addOpOnDate(today, 1);
 		// Log.d(TAG, "addOpMode2 after two add " +
 		// solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
@@ -979,7 +984,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 
 		// add op before X of next month, should update the current sum
 		today.add(Calendar.MONTH, -2);
-		addOpOnDate(today);
+		addOpOnDate(today, 2);
 		// Log.d(TAG, "addOpMode2 after three add " +
 		// solo.getCurrentListViews().get(0).getCount());
 		solo.clickInList(0);
@@ -1072,7 +1077,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 				Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
 		today.add(Calendar.MONTH, -1);
 		for (int i = 0; i < 10; ++i) {
-			addOpOnDate(today);
+			addOpOnDate(today, i);
 		}
 
 		solo.clickInList(9);
@@ -1236,7 +1241,6 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.waitForActivity(SCH_EDITOR);
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
-		today.add(Calendar.MONTH, 1);
 		solo.setDatePicker(0, today.get(Calendar.YEAR),
 				today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
 
@@ -1322,7 +1326,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		waitForListView();
 		solo.waitForDialogToClose(WAIT_DIALOG_TIME);
 		printCurrentTextViews();
-		double sum = 12 * 10.50;
+		double sum = 8 * 10.50;
 		assertTrue(solo.getText(3).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.50 - sum)));
 		assertTrue(solo.getText(6).getText().toString()
@@ -1341,12 +1345,14 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		makeSchTransfertHebdoFromAccList();
 		solo.clickInList(0);
 		solo.waitForActivity(OP_LIST);
+		waitForListView();
+		scrollUp();
 		solo.clickLongInList(0);
 		clickOnMenuItem(getString(R.string.delete));
 		solo.clickOnText(getString(R.string.del_only_current));
 		sleep(1000);
 		printCurrentTextViews();
-		double sum = 11 * 10.50;
+		double sum = 7 * 10.50;
 		assertTrue(solo.getText(1).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.50 - sum)));
 		solo.goBack();
@@ -1362,11 +1368,12 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		makeSchTransfertHebdoFromAccList();
 		solo.clickInList(0);
 		solo.waitForActivity(OP_LIST);
+		waitForListView();
+		scrollUp();
 		solo.clickLongInList(0);
 		clickOnMenuItem(getString(R.string.delete));
 		solo.clickOnText(getString(R.string.del_all_occurrences));
 		solo.waitForDialogToClose(WAIT_DIALOG_TIME);
-		waitForListView();
 
 		printCurrentTextViews();
 		String startSum = Formater.getSumFormater().format(1000.50);
@@ -1392,7 +1399,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
 		solo.clickOnText(getString(R.string.del_all_following));
 		sleep(1000);
 		printCurrentTextViews();
-		double sum = 9 * 10.50;
+		double sum = 5 * 10.50;
 		assertTrue(solo.getText(1).getText().toString()
 				.contains(Formater.getSumFormater().format(1000.50 - sum)));
 		solo.goBack();
