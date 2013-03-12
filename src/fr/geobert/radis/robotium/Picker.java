@@ -6,31 +6,31 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.util.Log;
-import android.view.View;
-import android.widget.DatePicker;
-import android.widget.TimePicker;
+    import android.view.View;
+    import android.widget.DatePicker;
+    import android.widget.TimePicker;
 
-import com.jayway.android.robotium.solo.Solo;
+    import com.jayway.android.robotium.solo.Solo;
 
-/**
- * RobotiumTestCustomer provides user actions drive the application under test.
- * Using an instance of RobotiumTestCustomer a test suite can click, scroll,
- * enter text, retrieve, and press views in the appication being tested.
- * 
- * RobotiumTestCustomer extends Robotium's Solo class to provide its
- * functionality. RobotiumTestCustomer also provides a home for addition global
- * testing actions.
- */
-public class Picker {
+    /**
+     * RobotiumTestCustomer provides user actions drive the application under test.
+     * Using an instance of RobotiumTestCustomer a test suite can click, scroll,
+     * enter text, retrieve, and press views in the appication being tested.
+     *
+     * RobotiumTestCustomer extends Robotium's Solo class to provide its
+     * functionality. RobotiumTestCustomer also provides a home for addition global
+     * testing actions.
+     */
+    public class Picker {
 
-    private static final String AM = "AM";
-    private static final String PM = "PM";
-    private static final String SET = "Set";
+        private static final String AM = "AM";
+        private static final String PM = "PM";
+        private static final String SET = "Set";
 
-    private static final int HOUR_PLUS_BUTTON_INDEX = 0;
-    private static final int HOUR_MINUS_BUTTON_INDEX = 1;
-    private static final int MINUTE_PLUS_BUTTON_INDEX = 2;
-    private static final int MINUTE_MINUS_BUTTON_INDEX = 3;
+        private static final int HOUR_PLUS_BUTTON_INDEX = 0;
+        private static final int HOUR_MINUS_BUTTON_INDEX = 1;
+        private static final int MINUTE_PLUS_BUTTON_INDEX = 2;
+        private static final int MINUTE_MINUS_BUTTON_INDEX = 3;
     private static final int MONTH_PLUS_BUTTON_INDEX = 2;
     private static final int MONTH_MINUS_BUTTON_INDEX = 3;
     private static final int DAY_PLUS_BUTTON_INDEX = 0;
