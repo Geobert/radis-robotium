@@ -4,7 +4,14 @@ import android.content.Context;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.TextView;
 import com.jayway.android.robotium.solo.Solo;
 import fr.geobert.radis.R;
 import fr.geobert.radis.tools.Formater;
@@ -412,8 +419,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
     public void addScheduleOp() {
         setUpSchOp();
         solo.clickOnImageButton(0);
-        GregorianCalendar today = new GregorianCalendar();
-        Tools.clearTimeOfCalendar(today);
+        GregorianCalendar today = Tools.createClearedCalendar();
         solo.setDatePicker(0, today.get(Calendar.YEAR),
                 today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
         solo.enterText(3, OP_TP);
@@ -857,8 +863,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
         solo.enterText(4, ACCOUNT_DESC);
         solo.pressSpinnerItem(1, 1);
         assertTrue(solo.getEditText(3).isEnabled());
-        GregorianCalendar today = new GregorianCalendar();
-        Tools.clearTimeOfCalendar(today);
+        GregorianCalendar today = Tools.createClearedCalendar();
         today.add(Calendar.DAY_OF_MONTH, 1);
         solo.enterText(3, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
         solo.clickOnButton(getString(R.string.ok));
@@ -937,8 +942,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
         solo.enterText(4, ACCOUNT_DESC);
         solo.pressSpinnerItem(1, 2);
         assertTrue(solo.getEditText(3).isEnabled());
-        GregorianCalendar today = new GregorianCalendar();
-        Tools.clearTimeOfCalendar(today);
+        GregorianCalendar today = Tools.createClearedCalendar();
         today.add(Calendar.DAY_OF_MONTH, 1);
         solo.enterText(3, Integer.toString(today.get(Calendar.DAY_OF_MONTH))
                 + "/" + Integer.toString(today.get(Calendar.MONTH) + 1) + "/"
@@ -1226,8 +1230,7 @@ public class AccountListTest extends ActivityInstrumentationTestCase2 {
     private void addSchTransfert() {
         solo.clickOnImageButton(0);
         solo.waitForActivity(SCH_EDITOR);
-        GregorianCalendar today = new GregorianCalendar();
-        Tools.clearTimeOfCalendar(today);
+        GregorianCalendar today = Tools.createClearedCalendar();
         solo.setDatePicker(0, today.get(Calendar.YEAR),
                 today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
 
