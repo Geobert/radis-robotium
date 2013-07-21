@@ -1,43 +1,42 @@
 package fr.geobert.radis.robotium;
 
+import android.util.Log;
+import android.view.View;
+import android.widget.DatePicker;
+import android.widget.TimePicker;
+import com.jayway.android.robotium.solo.Solo;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import android.util.Log;
-    import android.view.View;
-    import android.widget.DatePicker;
-    import android.widget.TimePicker;
+/**
+ * RobotiumTestCustomer provides user actions drive the application under test.
+ * Using an instance of RobotiumTestCustomer a test suite can click, scroll,
+ * enter text, retrieve, and press views in the appication being tested.
+ * <p/>
+ * RobotiumTestCustomer extends Robotium's Solo class to provide its
+ * functionality. RobotiumTestCustomer also provides a home for addition global
+ * testing actions.
+ */
+public class Picker {
 
-    import com.jayway.android.robotium.solo.Solo;
+    private static final String AM = "AM";
+    private static final String PM = "PM";
+    private static final String SET = "Set";
 
-    /**
-     * RobotiumTestCustomer provides user actions drive the application under test.
-     * Using an instance of RobotiumTestCustomer a test suite can click, scroll,
-     * enter text, retrieve, and press views in the appication being tested.
-     *
-     * RobotiumTestCustomer extends Robotium's Solo class to provide its
-     * functionality. RobotiumTestCustomer also provides a home for addition global
-     * testing actions.
-     */
-    public class Picker {
-
-        private static final String AM = "AM";
-        private static final String PM = "PM";
-        private static final String SET = "Set";
-
-        private static final int HOUR_PLUS_BUTTON_INDEX = 0;
-        private static final int HOUR_MINUS_BUTTON_INDEX = 1;
-        private static final int MINUTE_PLUS_BUTTON_INDEX = 2;
-        private static final int MINUTE_MINUS_BUTTON_INDEX = 3;
+    private static final int HOUR_PLUS_BUTTON_INDEX = 0;
+    private static final int HOUR_MINUS_BUTTON_INDEX = 1;
+    private static final int MINUTE_PLUS_BUTTON_INDEX = 2;
+    private static final int MINUTE_MINUS_BUTTON_INDEX = 3;
     private static final int MONTH_PLUS_BUTTON_INDEX = 2;
     private static final int MONTH_MINUS_BUTTON_INDEX = 3;
     private static final int DAY_PLUS_BUTTON_INDEX = 0;
     private static final int DAY_MINUS_BUTTON_INDEX = 1;
     private static final int YEAR_PLUS_BUTTON_INDEX = 4;
     private static final int YEAR_MINUS_BUTTON_INDEX = 5;
-    
+
     private final Solo solo;
 
     public Picker(Solo solo) {
@@ -48,15 +47,15 @@ import android.util.Log;
      * Calculates the minimum number of clicks needed to reach the target. A
      * positive number means click forward, while a negative number means click
      * backward.
-     * 
+     *
      * @param current
      * @param target
-     * @param max maximum number of values for the picker
+     * @param max     maximum number of values for the picker
      * @return minimum number of clicks to reach the target
      */
     private int calculateClicks(int current, int target, int max) {
-    	Log.d("Robotium", String.format("%d/%d/%d", current, target, max));
-		double mid = max / 2D;
+        Log.d("Robotium", String.format("%d/%d/%d", current, target, max));
+        double mid = max / 2D;
         int clicks = target - current;
         if (clicks < -mid)
             clicks = max + target - current;
@@ -68,15 +67,15 @@ import android.util.Log;
      * Adjusts the current date clicker dialog to the specified date by clicking
      * on indiviual controls. Months are zero-based, January = 0, February = 1,
      * etc. See java.util.Calendar.
-     * 
+     *
      * @param monthOfYear
      * @param dayOfMonth
      * @param year
      */
     public void clickOnDatePicker(int monthOfYear, int dayOfMonth, int year) {
         //solo.waitForText(SET);
-    	solo.waitForView(DatePicker.class);
-    	Log.d("RadisRobotium", String.format("%d/%d/%d", monthOfYear, dayOfMonth, year));
+        solo.waitForView(DatePicker.class);
+        Log.d("RadisRobotium", String.format("%d/%d/%d", monthOfYear, dayOfMonth, year));
         DatePicker picker = getDatePicker();
         if (picker == null) return;
 
@@ -95,7 +94,7 @@ import android.util.Log;
 
     /**
      * Clicks on an indiviual picker buttons, either + or -.
-     * 
+     *
      * @param plusButtonIndex
      * @param currentNumber
      * @param targetNumber
@@ -110,7 +109,7 @@ import android.util.Log;
     /**
      * Adjusts the current time clicker dialog to the specified time by clicking
      * on indiviual controls.
-     * 
+     *
      * @param hour
      * @param minute
      */
@@ -142,12 +141,12 @@ import android.util.Log;
     /**
      * For the current activity, returns list of views of the specified class or
      * any of its subclasses.
-     * 
+     * <p/>
      * This method mimics the behavior of Robotium's
      * ViewFetcher.getCurrentViews() method. However, Robotium's Solo class does
      * not expose this method. This method is intended find subclasses of views
      * which Robotium does not address.
-     * 
+     *
      * @param filterClass - class to filter views by
      * @return list of views filter by the class specified
      */
@@ -164,7 +163,7 @@ import android.util.Log;
 
     /**
      * Returns the current date picker, if it exists; otherwise null
-     * 
+     *
      * @return date picker instance
      */
     private DatePicker getDatePicker() {
@@ -175,7 +174,7 @@ import android.util.Log;
 
     /**
      * Returns the current time picker, if it exists; otherwise null
-     * 
+     *
      * @return time picker instance
      */
     private TimePicker getTimePicker() {
