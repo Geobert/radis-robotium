@@ -3,3 +3,5 @@ syntax: regexp
 ^bin$
 syntax: regexp
 .settings
+syntax: glob
+gen/
