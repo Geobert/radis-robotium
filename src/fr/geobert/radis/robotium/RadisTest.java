@@ -55,7 +55,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     protected void setUp() throws Exception {
         super.setUp();
         solo = new Solo(getInstrumentation(), getActivity());
-        tools = new Tools(solo, this);
+        this.tools = new Tools(solo, this);
     }
 
     @Override
@@ -68,13 +68,12 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
 	 */
 
     public void addAccount() {
-        solo.waitForActivity(AccountEditor.class);
+        assertTrue(solo.waitForActivity(AccountEditor.class));
         solo.enterText(0, ACCOUNT_NAME);
         solo.enterText(1, ACCOUNT_START_SUM);
         solo.enterText(4, ACCOUNT_DESC);
         solo.clickOnActionBarItem(R.id.confirm);
-        solo.waitForActivity(OperationListActivity.class);
-        solo.waitForView(R.id.quick_add_layout);
+        assertTrue(solo.waitForActivity(OperationListActivity.class));
         assertEquals(1, solo.getView(Spinner.class, 0).getCount());
         assertEquals(ACCOUNT_NAME, solo.getText(CUR_ACC_NAME_IDX).getText().toString());
         assertEquals(ACCOUNT_START_SUM_FORMATED_ON_LIST, solo.getText(CUR_ACC_SUM_IDX).getText().toString());
@@ -134,7 +133,6 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     public void testQuickAddFromOpList() {
         TAG = "testQuickAddFromOpList";
         addAccount();
-        solo.waitForDialogToClose(WAIT_DIALOG_TIME);
         tools.printCurrentTextViews();
         assertTrue(
                 solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
