@@ -130,6 +130,62 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         }
     }
 
+    private void setUpOpTest() {
+        addAccount();
+    }
+
+    public void addOp() {
+        setUpOpTest();
+        solo.pressMenuItem(0);
+        solo.waitForActivity(OP_EDITOR);
+        solo.enterText(3, OP_TP);
+        for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+            solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
+        }
+        solo.enterText(5, OP_TAG);
+        solo.enterText(6, OP_MODE);
+        solo.enterText(7, OP_DESC);
+        solo.clickOnActionBarItem(R.id.confirm);
+        assertTrue(solo.getText(1).getText().toString().contains("990,00"));
+        assertTrue(solo.getText(4).getText().toString()
+                .equals(OP_AMOUNT_FORMATED));
+    }
+
+    public void addManyOps() {
+        setUpOpTest();
+        for (int j = 0; j < 10; ++j) {
+            solo.clickOnActionBarItem(R.id.create_operation);
+            solo.waitForActivity(OP_EDITOR);
+            solo.enterText(3, OP_TP + j);
+            solo.enterText(4, OP_AMOUNT_2);
+            solo.enterText(5, OP_TAG);
+            solo.enterText(6, OP_MODE);
+            solo.enterText(7, OP_DESC);
+            solo.clickOnActionBarItem(R.id.confirm);
+            solo.waitForActivity(OperationListActivity.class);
+            tools.waitForListView();
+        }
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("0,50"));
+    }
+
+    public void testEditOp() {
+        TAG = "testEditOp";
+        addManyOps();
+        tools.sleep(1000);
+        tools.scrollUp();
+        solo.clickInList(5, 0);
+        tools.sleep(2000);
+        solo.clickOnImageButton(0);
+        solo.waitForActivity(OP_EDITOR);
+        solo.clearEditText(4);
+        solo.enterText(4, "103");
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        tools.sleep(500);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("-2,50"));
+    }
+
     public void testQuickAddFromOpList() {
         TAG = "testQuickAddFromOpList";
         addAccount();

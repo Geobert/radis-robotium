@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.jayway.android.robotium.solo.Solo;
@@ -87,5 +88,14 @@ class Tools {
         imm.hideSoftInputFromWindow(solo.getEditText(0).getWindowToken(), 0);
     }
 
-
+    int findIndexOfImageButton(int id) {
+        ArrayList<ImageButton> a = solo.getCurrentViews(ImageButton.class);
+        for (int i = 0; i < a.size(); i++) {
+            ImageButton b = a.get(i);
+            if (b.getId() == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
