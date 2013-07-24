@@ -1,6 +1,7 @@
 package fr.geobert.radis.robotium;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.util.Log;
 import android.widget.ListView;
 import android.widget.Spinner;
 import com.jayway.android.robotium.solo.Solo;
@@ -60,7 +61,12 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
 
     @Override
     protected void tearDown() throws Exception {
-        solo.finishOpenedActivities();
+        try {
+            Log.d(TAG, "tearDown !");
+            solo.finishOpenedActivities();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -146,7 +152,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.enterText(6, OP_MODE);
         solo.enterText(7, OP_DESC);
         solo.clickOnActionBarItem(R.id.confirm);
-        assertTrue(solo.getText(1).getText().toString().contains("990,00"));
+        assertTrue(solo.getText(1).getText().toString().contains(Formater.getSumFormater().format(990)));
         assertTrue(solo.getText(4).getText().toString()
                 .equals(OP_AMOUNT_FORMATED));
     }
@@ -165,7 +171,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
             solo.waitForActivity(OperationListActivity.class);
             tools.waitForListView();
         }
-        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("0,50"));
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(0.5)));
     }
 
     public void testEditOp() {
@@ -183,7 +189,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.waitForActivity(OperationListActivity.class);
         tools.sleep(500);
         tools.printCurrentTextViews();
-        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("-2,50"));
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(-2.5)));
     }
 
     public void testQuickAddFromOpList() {
