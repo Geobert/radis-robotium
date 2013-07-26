@@ -6,15 +6,26 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import com.jayway.android.robotium.solo.Solo;
 import fr.geobert.radis.R;
+import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.ui.OperationListActivity;
+import fr.geobert.radis.ui.ScheduledOpListActivity;
 import fr.geobert.radis.ui.editor.AccountEditor;
+import fr.geobert.radis.ui.editor.OperationEditor;
+import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class RadisTest extends ActivityInstrumentationTestCase2<OperationListActivity> {
     private static final int WAIT_DIALOG_TIME = 2000;
 
     private static final int CUR_ACC_NAME_IDX = 0;
     private static final int CUR_ACC_SUM_IDX = 2;
+    public static final int FIRST_OP_SUM_IDX = 9;
+    public static final int THIRD_PARTY_FIELD_IDX = 3;
+    public static final int SUM_FIELD_IDX = 4;
 
     static String TAG = "RadisRobotium";
     static final String ACCOUNT_NAME = "Test";
@@ -35,14 +46,8 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     static final String OP_DESC = "Robotium Operation 1";
     static final String OP_AMOUNT_2 = "100";
 
-    static String OP_EDITOR = "OperationEditor";
-    static String SCH_LIST = "ScheduledOpListActivity";
-    static String SCH_EDITOR = "ScheduledOperationEditor";
-    static String CFG_EDITOR = "RadisConfiguration";
-
-
     private Solo solo;
-    private Tools tools;
+    private RoboTools tools;
 
     static {
         OperationListActivity.ROBOTIUM_MODE = true;
@@ -55,8 +60,9 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        solo = new Solo(getInstrumentation(), getActivity());
-        this.tools = new Tools(solo, this);
+        solo = new Solo(getInstrumentation());
+        getActivity();
+        this.tools = new RoboTools(solo, this);
     }
 
     @Override
@@ -129,7 +135,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
 
     public void deleteAccount(int originalCount) {
         solo.pressMenuItem(2);
-        solo.clickOnButton(tools.getString(fr.geobert.radis.R.string.yes));
+        solo.clickOnButton(solo.getString(fr.geobert.radis.R.string.yes));
         solo.waitForDialogToClose(WAIT_DIALOG_TIME);
         if (originalCount > 1) {
             assertEquals(originalCount - 1, solo.getCurrentViews(ListView.class).get(0).getCount());
@@ -143,7 +149,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     public void addOp() {
         setUpOpTest();
         solo.pressMenuItem(0);
-        solo.waitForActivity(OP_EDITOR);
+        solo.waitForActivity(OperationEditor.class);
         solo.enterText(3, OP_TP);
         for (int i = 0; i < OP_AMOUNT.length(); ++i) {
             solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
@@ -161,7 +167,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         setUpOpTest();
         for (int j = 0; j < 10; ++j) {
             solo.clickOnActionBarItem(R.id.create_operation);
-            solo.waitForActivity(OP_EDITOR);
+            solo.waitForActivity(OperationEditor.class);
             solo.enterText(3, OP_TP + j);
             solo.enterText(4, OP_AMOUNT_2);
             solo.enterText(5, OP_TAG);
@@ -169,7 +175,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
             solo.enterText(7, OP_DESC);
             solo.clickOnActionBarItem(R.id.confirm);
             solo.waitForActivity(OperationListActivity.class);
-            tools.waitForListView();
+            solo.waitForView(ListView.class);
         }
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(0.5)));
     }
@@ -182,7 +188,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.clickInList(5, 0);
         tools.sleep(2000);
         solo.clickOnImageButton(0);
-        solo.waitForActivity(OP_EDITOR);
+        solo.waitForActivity(OperationEditor.class);
         solo.clearEditText(4);
         solo.enterText(4, "103");
         solo.clickOnActionBarItem(R.id.confirm);
@@ -206,5 +212,90 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertEquals(1, solo.getCurrentViews(ListView.class).get(0).getCount());
         assertTrue(
                 solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(999.50)));
+    }
+
+    public void testDisableAutoNegate() {
+        TAG = "testDisableAutoNegate";
+        setUpOpTest();
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(OperationEditor.class);
+        solo.enterText(THIRD_PARTY_FIELD_IDX, OP_TP);
+        solo.enterText(SUM_FIELD_IDX, "+");
+        for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+            solo.enterText(SUM_FIELD_IDX, String.valueOf(OP_AMOUNT.charAt(i)));
+        }
+        tools.printCurrentEditTexts();
+        assertTrue(solo.getEditText(SUM_FIELD_IDX).getText().toString().equals("+10,50"));
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("1 011,00"));
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(FIRST_OP_SUM_IDX).getText().toString().equals("10,50"));
+    }
+
+    /**
+     * Schedule ops
+     */
+
+
+    private void setUpSchOp() {
+        addAccount();
+        solo.clickOnActionBarItem(R.id.go_to_preferences);
+        solo.waitForActivity(RadisConfiguration.class);
+        solo.clickOnText(solo.getString(R.string.prefs_insertion_date_label));
+        solo.clearEditText(0);
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.add(Calendar.DAY_OF_MONTH, 1);
+        solo.enterText(0, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+        solo.clickOnButton(solo.getString(R.string.ok));
+        solo.goBack();
+        solo.clickOnActionBarItem(R.id.go_to_sch_op);
+        solo.waitForActivity(ScheduledOpListActivity.class);
+        assertTrue(solo.waitForText(solo.getString(R.string.no_operation_sch)));
+    }
+
+    public void addScheduleOp() {
+        setUpSchOp();
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(ScheduledOperationEditor.class);
+        GregorianCalendar today = Tools.createClearedCalendar();
+        solo.setDatePicker(0, today.get(Calendar.YEAR),
+                today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+        solo.enterText(3, OP_TP);
+        solo.enterText(4, "9,50");
+        solo.enterText(5, OP_TAG);
+        solo.enterText(6, OP_MODE);
+        solo.enterText(7, OP_DESC);
+        tools.scrollUp();
+        solo.clickOnText(solo.getString(R.string.scheduling));
+        solo.pressSpinnerItem(0, 1);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForView(ListView.class);
+        assertEquals(1, solo.getCurrentViews(ListView.class).get(0).getCount());
+        solo.goBack();
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        // -1 is for "get more ops" line
+        assertEquals(1, solo.getCurrentViews(ListView.class).get(0).getCount());
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("991,00"));
+    }
+
+    public void testEditScheduledOp() {
+        TAG = "testEditScheduledOp";
+        addScheduleOp();
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        solo.waitForActivity(ScheduledOperationEditor.class);
+        solo.clearEditText(SUM_FIELD_IDX);
+        solo.enterText(SUM_FIELD_IDX, "-7,50");
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForText(solo.getString(R.string.update));
+        solo.clickOnButton(solo.getString(R.string.update));
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("993,00"));
     }
 }
