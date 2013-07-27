@@ -287,7 +287,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         addScheduleOp();
         solo.clickInList(0);
         solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
-        solo.waitForActivity(ScheduledOperationEditor.class);
+        solo.waitForActivity(OperationEditor.class);
         solo.clearEditText(SUM_FIELD_IDX);
         solo.enterText(SUM_FIELD_IDX, "-7,50");
         solo.clickOnActionBarItem(R.id.confirm);
