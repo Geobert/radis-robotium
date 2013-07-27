@@ -298,4 +298,55 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         tools.printCurrentTextViews();
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("993,00"));
     }
+
+    private int setupDelOccFromOps() {
+        setUpSchOp();
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(ScheduledOperationEditor.class);
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.add(Calendar.DAY_OF_MONTH, -14);
+        solo.setDatePicker(0, today.get(Calendar.YEAR),
+                today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+        solo.enterText(3, OP_TP);
+        solo.enterText(4, "1,00");
+        solo.enterText(5, OP_TAG);
+        solo.enterText(6, OP_MODE);
+        solo.enterText(7, OP_DESC);
+        solo.clickOnText(solo.getString(R.string.scheduling));
+        solo.pressSpinnerItem(0, 1);
+        solo.pressSpinnerItem(1, -1);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForView(ListView.class);
+        solo.goBack();
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        tools.scrollDown();
+        tools.sleep(1000);
+        int nbOps = solo.getCurrentViews(ListView.class).get(0).getCount();
+        tools.printCurrentTextViews();
+        Log.d(TAG, "interface text : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString()
+                + " / " + Formater.getSumFormater().format(1000.5 - nbOps));
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString()
+                .contains(Formater.getSumFormater().format(1000.5 - nbOps)));
+        return nbOps;
+    }
+
+    public void testDelFutureOccurences() {
+        TAG = "testDelFutureOccurences";
+        int nbOps = setupDelOccFromOps();
+        Log.d(TAG, "nbOPS : " + nbOps);
+        solo.clickInList(nbOps - (nbOps - 2));
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnButton(solo.getString(R.string.del_all_following));
+        tools.sleep(600);
+//        solo.clickInList(solo.getCurrentViews(ListView.class).get(0).getCount());
+//        assertEquals(2, solo.getCurrentViews(ListView.class).get(0).getCount() - 1);
+        int newNbOps = solo.getCurrentViews(ListView.class).get(0).getCount();
+        assertTrue(newNbOps < nbOps);
+        tools.printCurrentTextViews();
+        Log.d(TAG, "interface text : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString()
+                + " / " + Formater.getSumFormater().format(1000.5 - newNbOps) + " nbops / newnbops " + nbOps + " / " + newNbOps);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString()
+                .contains(Formater.getSumFormater().format(1000.5 - newNbOps)));
+    }
 }
