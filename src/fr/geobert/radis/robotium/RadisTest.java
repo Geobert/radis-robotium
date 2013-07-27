@@ -349,4 +349,17 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString()
                 .contains(Formater.getSumFormater().format(1000.5 - newNbOps)));
     }
+
+    public void testDelAllOccurencesFromOps() {
+        TAG = "testDelAllOccurencesFromOps";
+        int nbOps = setupDelOccFromOps();
+        solo.clickInList(nbOps - (nbOps - 2));
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnButton(solo.getString(R.string.del_all_occurrences));
+        tools.sleep(1000);
+        assertEquals(0, solo.getCurrentViews(ListView.class).get(0).getCount());
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString()
+                .contains(Formater.getSumFormater().format(1000.5)));
+    }
 }
