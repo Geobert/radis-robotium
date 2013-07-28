@@ -3,6 +3,7 @@ package fr.geobert.radis.robotium;
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -80,13 +81,20 @@ class RoboTools {
     }
 
     int findIndexOfImageButton(int id) {
+        int res = -1;
         ArrayList<ImageButton> a = solo.getCurrentViews(ImageButton.class);
+        int j = 0;
         for (int i = 0; i < a.size(); i++) {
             ImageButton b = a.get(i);
             if (b.getId() == id) {
-                return i;
+                res = j;
+                break;
+            }
+            if (b.getVisibility() == View.VISIBLE) {
+                j++;
             }
         }
-        return -1;
+        Log.d("RoboTools", "findIndexOfImageButton : " + res);
+        return res;
     }
 }

@@ -2,8 +2,11 @@ package fr.geobert.radis.robotium;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import com.jayway.android.robotium.solo.Solo;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
@@ -361,5 +364,129 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         tools.printCurrentTextViews();
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString()
                 .contains(Formater.getSumFormater().format(1000.5)));
+    }
+
+    // issue 112 : it was about when clicking on + or - of date chooser then cancel that does not work
+    // since android 3, the date picker has no buttons anymore, removed Picker usage
+    public void testCancelSchEdition() {
+        TAG = "testCancelSchEdition";
+//        Picker picker = new Picker(solo);
+        setupDelOccFromOps();
+        solo.clickOnActionBarItem(R.id.go_to_sch_op);
+        solo.waitForActivity(ScheduledOpListActivity.class);
+        solo.waitForView(ListView.class);
+        tools.printCurrentTextViews();
+        final CharSequence date = solo.getCurrentViews(TextView.class).get(2).getText();
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        solo.waitForActivity(ScheduledOperationEditor.class);
+        solo.waitForDialogToClose(WAIT_DIALOG_TIME);
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.add(Calendar.MONTH, -2);
+//        picker.clickOnDatePicker(today.get(Calendar.MONTH) + 1,
+//                today.get(Calendar.DAY_OF_MONTH), today.get(Calendar.YEAR));
+        solo.setDatePicker(0, today.get(Calendar.YEAR),
+                today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.clickOnButton(solo.getString(R.string.cancel));
+        solo.clickOnActionBarItem(R.id.cancel);
+        solo.waitForActivity(ScheduledOpListActivity.class);
+        solo.waitForView(ListView.class);
+        tools.printCurrentTextViews();
+        Log.d(TAG, "before date : " + date);
+        assertEquals(date, solo.getCurrentViews(TextView.class).get(2).getText());
+    }
+
+    // issue 59 test
+    public void testDeleteAllOccurences() {
+        TAG = "testDeleteAllOccurences";
+        setUpSchOp();
+        solo.clickOnActionBarItem(R.id.create_operation);
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.add(Calendar.MONTH, -2);
+        solo.setDatePicker(0, today.get(Calendar.YEAR),
+                today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+        solo.enterText(3, OP_TP);
+        solo.enterText(4, "9,50");
+        solo.enterText(5, OP_TAG);
+        solo.enterText(6, OP_MODE);
+        solo.enterText(7, OP_DESC);
+        tools.scrollUp();
+        solo.clickOnText(solo.getString(R.string.scheduling));
+        solo.pressSpinnerItem(0, 1);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForView(ListView.class);
+        solo.goBack();
+        solo.waitForView(ListView.class);
+        assertEquals(3, solo.getCurrentViews(ListView.class).get(0).getCount());
+
+        solo.clickOnActionBarItem(R.id.go_to_sch_op);
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnButton(solo.getString(R.string.del_all_occurrences));
+        assertTrue(solo.waitForText(solo.getString(R.string.no_operation_sch)));
+        solo.goBack();
+        solo.waitForActivity(OperationListActivity.class);
+        assertTrue(solo.waitForText(solo.getString(R.string.no_operation)));
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString()
+                .contains(Formater.getSumFormater().format(1000.50)));
+    }
+
+    /**
+     * Infos
+     */
+
+    // test adding info with different casing
+    public void testAddExistingInfo() {
+        TAG = "testAddExistingInfo";
+        setUpOpTest();
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(OperationEditor.class);
+        solo.enterText(3, OP_TP);
+        for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+            solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
+        }
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op_third_parties_list));
+        solo.clickOnButton(solo.getString(R.string.create));
+        solo.enterText(0, "Atest");
+        solo.clickOnButton(solo.getString(R.string.ok));
+        solo.waitForView(ListView.class);
+        assertEquals(1, solo.getCurrentViews(ListView.class).get(0).getCount());
+        solo.clickOnButton(solo.getString(R.string.create));
+        solo.enterText(0, "ATest");
+        solo.clickOnButton(solo.getString(R.string.ok));
+        assertNotNull(solo
+                .getText(solo.getString(fr.geobert.radis.R.string.item_exists)));
+    }
+
+    // issue 50 test
+    public void testAddInfoAndCreateOp() {
+        TAG = "testAddInfoAndCreateOp";
+        setUpOpTest();
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.enterText(3, OP_TP);
+        for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+            solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
+        }
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op_third_parties_list));
+        solo.waitForText(solo.getString(R.string.create));
+        solo.clickOnButton(solo.getString(R.string.create));
+        solo.waitForView(EditText.class);
+        solo.enterText(0, "Atest");
+        solo.clickOnButton(solo.getString(R.string.ok));
+        tools.sleep(1000);
+        solo.clickInList(0);
+        tools.sleep(500);
+        solo.clickOnButton(solo.getString(R.string.ok));
+        solo.waitForDialogToClose(500);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(OperationEditor.class);
+        solo.waitForView(ImageButton.class);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op_third_parties_list));
+        solo.waitForView(ListView.class);
+        assertEquals(1, solo.getCurrentViews(ListView.class).get(0).getCount());
     }
 }
