@@ -2,6 +2,7 @@ package fr.geobert.radis.robotium;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -25,10 +26,12 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     private static final int WAIT_DIALOG_TIME = 2000;
 
     private static final int CUR_ACC_NAME_IDX = 0;
+    private static final int CUR_ACC_PROJ_DATE_IDX = 1;
     private static final int CUR_ACC_SUM_IDX = 2;
     public static final int FIRST_OP_SUM_IDX = 9;
     public static final int THIRD_PARTY_FIELD_IDX = 3;
     public static final int SUM_FIELD_IDX = 4;
+    public static final int FIRST_SUM_AT_SEL_IDX = 6;
 
     static String TAG = "RadisRobotium";
     static final String ACCOUNT_NAME = "Test";
@@ -489,4 +492,122 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.waitForView(ListView.class);
         assertEquals(1, solo.getCurrentViews(ListView.class).get(0).getCount());
     }
+
+    private void addOpOnDate(GregorianCalendar t, int idx) {
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(OperationEditor.class);
+        solo.waitForView(DatePicker.class);
+        solo.setDatePicker(0, t.get(Calendar.YEAR), t.get(Calendar.MONTH),
+                t.get(Calendar.DAY_OF_MONTH));
+        solo.enterText(3, OP_TP + "/" + idx);
+        solo.enterText(4, "1");
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+    }
+
+    private void setUpProjTest1() {
+        addAccount();
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
+        today.add(Calendar.MONTH, -2);
+        for (int i = 0; i < 6; ++i) {
+            addOpOnDate(today, i);
+            today.add(Calendar.MONTH, +1);
+        }
+    }
+
+    public void testProjectionFromOpList() {
+        TAG = "testProjectionFromOpList";
+        // test mode 0
+        setUpProjTest1();
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
+        today.add(Calendar.MONTH, 3);
+        String projSumTxt = solo.getCurrentViews(TextView.class).get(CUR_ACC_SUM_IDX).getText().toString();
+        String projDateTxt = solo.getCurrentViews(TextView.class).get(CUR_ACC_PROJ_DATE_IDX).getText().toString();
+        Log.d(TAG, "testProjectionFromOpList : " + Tools.getDateStr(today) + " VS " + projDateTxt + "/" + projSumTxt);
+        assertTrue(projDateTxt.contains(Tools.getDateStr(today)));
+        assertTrue(projSumTxt.contains("994,50"));
+        solo.clickInList(0);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains("994,50"));
+
+        // test mode 1
+        solo.pressMenuItem(4);
+        solo.waitForActivity(AccountEditor.class);
+        solo.pressSpinnerItem(1, 1);
+        tools.hideKeyboard();
+        assertTrue(solo.waitForView(EditText.class));
+        assertTrue(solo.getCurrentViews(EditText.class).get(3).isEnabled());
+        today = Tools.createClearedCalendar();
+        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
+        solo.enterText(3, Integer.toString(Math.min(today.get(Calendar.DAY_OF_MONTH), 28)));
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        today.add(Calendar.MONTH, 1);
+        Log.d(TAG, "1DATE : " + Tools.getDateStr(today));
+        projDateTxt = solo.getCurrentViews(TextView.class).get(CUR_ACC_PROJ_DATE_IDX).getText().toString();
+        Log.d(TAG, "1DATE displayed : " + projDateTxt);
+        tools.printCurrentTextViews();
+        assertTrue(projDateTxt.contains(Tools.getDateStr(today)));
+        assertTrue(solo.getCurrentViews(TextView.class).get(CUR_ACC_SUM_IDX).getText().toString().contains("996,50"));
+        solo.clickInList(0);
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains("994,50"));
+
+        // test mode 2
+        solo.pressMenuItem(4);
+        solo.waitForActivity(AccountEditor.class);
+        solo.pressSpinnerItem(1, 1);
+        tools.hideKeyboard();
+        assertTrue(solo.waitForView(EditText.class));
+        assertTrue(solo.getEditText(3).isEnabled());
+        today = Tools.createClearedCalendar();
+        today.set(Calendar.DAY_OF_MONTH, 28);
+        today.add(Calendar.MONTH, +3);
+        solo.enterText(3, Tools.getDateStr(today));
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        Log.d(TAG, "2DATE : " + Tools.getDateStr(today));
+        projDateTxt = solo.getCurrentViews(TextView.class).get(CUR_ACC_PROJ_DATE_IDX).getText().toString();
+        Log.d(TAG, "2DATE displayed : " + projDateTxt);
+        tools.printCurrentTextViews();
+        assertTrue(projDateTxt.contains(Tools.getDateStr(today)));
+        solo.clickInList(0);
+//        assertTrue(solo.getText(1).getText().toString().contains("994,50"));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains("994,50"));
+        tools.scrollDown();
+        tools.sleep(1000);
+        tools.scrollDown();
+        tools.sleep(1000);
+        tools.scrollDown();
+        solo.clickInList(5);
+        tools.sleep(1000);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getCurrentViews(TextView.class).get(CUR_ACC_SUM_IDX).getText().toString().contains("994,50"));
+        assertTrue(solo.getText(25).getText().toString().contains("998,50"));
+
+        // test back to mode 0
+        solo.pressMenuItem(4);
+        solo.waitForActivity(RadisConfiguration.class);
+        solo.pressSpinnerItem(1, -2);
+        tools.hideKeyboard();
+        assertTrue(solo.waitForView(EditText.class));
+        assertFalse(solo.getEditText(3).isEnabled());
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        Log.d(TAG, "0DATE : " + Tools.getDateStr(today));
+        projDateTxt = solo.getCurrentViews(TextView.class).get(CUR_ACC_PROJ_DATE_IDX).getText().toString();
+        projSumTxt = solo.getCurrentViews(TextView.class).get(CUR_ACC_SUM_IDX).getText().toString();
+        Log.d(TAG, "0DATE displayed : " + projDateTxt);
+        Log.d(TAG, "solo.getButton(0).getText() : " + projSumTxt);
+        tools.printCurrentTextViews();
+        assertTrue(projSumTxt.contains("994,50"));
+        assertTrue(solo.getText(25).getText().toString().contains("998,50"));
+    }
+
+    
 }
