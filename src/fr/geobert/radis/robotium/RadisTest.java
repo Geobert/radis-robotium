@@ -528,10 +528,10 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         String projDateTxt = solo.getCurrentViews(TextView.class).get(CUR_ACC_PROJ_DATE_IDX).getText().toString();
         Log.d(TAG, "testProjectionFromOpList : " + Tools.getDateStr(today) + " VS " + projDateTxt + "/" + projSumTxt);
         assertTrue(projDateTxt.contains(Tools.getDateStr(today)));
-        assertTrue(projSumTxt.contains("994,50"));
+        assertTrue(projSumTxt.contains(Formater.getSumFormater().format(994.50)));
         solo.clickInList(0);
         tools.printCurrentTextViews();
-        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains("994,50"));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(994.50)));
 
         // test mode 1
         solo.pressMenuItem(4);
@@ -552,9 +552,9 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         Log.d(TAG, "1DATE displayed : " + projDateTxt);
         tools.printCurrentTextViews();
         assertTrue(projDateTxt.contains(Tools.getDateStr(today)));
-        assertTrue(solo.getCurrentViews(TextView.class).get(CUR_ACC_SUM_IDX).getText().toString().contains("996,50"));
+        assertTrue(solo.getCurrentViews(TextView.class).get(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(996.50)));
         solo.clickInList(0);
-        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains("994,50"));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(994.50)));
 
         // test mode 2
         solo.pressMenuItem(4);
@@ -577,7 +577,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(projDateTxt.contains(Tools.getDateStr(today)));
         solo.clickInList(0);
 //        assertTrue(solo.getText(1).getText().toString().contains("994,50"));
-        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains("994,50"));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(994.50)));
         tools.scrollDown();
         tools.sleep(1000);
         tools.scrollDown();
@@ -586,8 +586,8 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.clickInList(5);
         tools.sleep(1000);
         tools.printCurrentTextViews();
-        assertTrue(solo.getCurrentViews(TextView.class).get(CUR_ACC_SUM_IDX).getText().toString().contains("994,50"));
-        assertTrue(solo.getText(25).getText().toString().contains("998,50"));
+        assertTrue(solo.getCurrentViews(TextView.class).get(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(994.50)));
+        assertTrue(solo.getText(25).getText().toString().contains(Formater.getSumFormater().format(998.50)));
 
         // test back to mode 0
         solo.pressMenuItem(4);
@@ -605,9 +605,196 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         Log.d(TAG, "0DATE displayed : " + projDateTxt);
         Log.d(TAG, "solo.getButton(0).getText() : " + projSumTxt);
         tools.printCurrentTextViews();
-        assertTrue(projSumTxt.contains("994,50"));
-        assertTrue(solo.getText(25).getText().toString().contains("998,50"));
+        assertTrue(projSumTxt.contains(Formater.getSumFormater().format(994.50)));
+        assertTrue(solo.getText(25).getText().toString().contains(Formater.getSumFormater().format(998.50)));
     }
 
-    
+    public void addOpMode1() {
+        // add account
+        assertTrue(solo.waitForActivity(AccountEditor.class));
+        solo.enterText(0, ACCOUNT_NAME);
+        solo.enterText(1, ACCOUNT_START_SUM);
+        solo.enterText(4, ACCOUNT_DESC);
+
+        solo.pressSpinnerItem(1, 1);
+        tools.hideKeyboard();
+        assertTrue(solo.waitForView(EditText.class));
+        assertTrue(solo.getEditText(3).isEnabled());
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.add(Calendar.DAY_OF_MONTH, 1);
+        solo.enterText(3, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+        solo.clickOnActionBarItem(R.id.confirm);
+
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
+        Log.d(TAG, "addOpMode1 before add " + solo.getCurrentViews(ListView.class).get(0).getCount());
+        today.add(Calendar.DAY_OF_MONTH, -1);
+        addOpOnDate(today, 0);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(999.50)));
+        solo.clickInList(0);
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(999.50)));
+        Log.d(TAG, "addOpMode1 after one add " + solo.getCurrentViews(ListView.class).get(0).getCount());
+        // add op after X
+        today.add(Calendar.MONTH, +1);
+        addOpOnDate(today, 1);
+        solo.clickInList(0);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(999.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(998.50)));
+        Log.d(TAG, "addOpMode1 after two add " + solo.getCurrentViews(ListView.class).get(0).getCount());
+        // add op before X of next month, should update the current sum
+        today.add(Calendar.MONTH, -2);
+        addOpOnDate(today, 2);
+        // Log.d(TAG, "addOpMode1 after three add " +
+        // solo.getCurrentListViews().get(0).getCount());
+        solo.clickInList(0);
+        tools.printCurrentButtons();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(998.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(997.50)));
+    }
+
+    public void editOpMode1() {
+        addOpMode1();
+
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        solo.waitForActivity(OperationEditor.class);
+        solo.clearEditText(SUM_FIELD_IDX);
+        solo.enterText(SUM_FIELD_IDX, "+2");
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.clickInList(0);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(998.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
+        // Log.d(TAG, "editOpMode1 after one edit " + solo.getCurrentListViews().get(0).getCount());
+
+        solo.clickInList(3);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        solo.clearEditText(SUM_FIELD_IDX);
+        solo.enterText(SUM_FIELD_IDX, "+2");
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        // Log.d(TAG, "editOpMode1 after one edit " + solo.getCurrentListViews().get(0).getCount());
+        solo.clickInList(0);
+        assertEquals(3, solo.getCurrentViews(ListView.class).get(0).getCount());
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1001.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(1003.50)));
+    }
+
+    public void addOpMode2() {
+        // add account
+        solo.waitForActivity(AccountEditor.class);
+        solo.enterText(0, ACCOUNT_NAME);
+        solo.enterText(1, ACCOUNT_START_SUM);
+        solo.enterText(4, ACCOUNT_DESC);
+        solo.pressSpinnerItem(1, 2);
+        tools.hideKeyboard();
+        solo.waitForView(EditText.class);
+        assertTrue(solo.getEditText(3).isEnabled());
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.add(Calendar.DAY_OF_MONTH, 1);
+        solo.enterText(3, Integer.toString(today.get(Calendar.DAY_OF_MONTH)) + "/" +
+                Integer.toString(today.get(Calendar.MONTH) + 1) + "/" + Integer.toString(today.get(Calendar.YEAR)));
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        Log.d(TAG, "addOpMode2 before add " + solo.getCurrentViews(ListView.class).get(0).getCount());
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
+
+        today.add(Calendar.DAY_OF_MONTH, -1);
+        addOpOnDate(today, 0);
+        // Log.d(TAG, "addOpMode2 after one add " + solo.getCurrentListViews().get(0).getCount());
+        tools.printCurrentTextViews();
+        solo.clickInList(0);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(999.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(999.50)));
+
+        // add op after X
+        today.add(Calendar.MONTH, +1);
+        addOpOnDate(today, 1);
+        // Log.d(TAG, "addOpMode2 after two add " +
+        // solo.getCurrentListViews().get(0).getCount());
+        solo.clickInList(0);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(999.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(998.50)));
+
+        // add op before X of next month, should update the current sum
+        today.add(Calendar.MONTH, -2);
+        addOpOnDate(today, 2);
+        // Log.d(TAG, "addOpMode2 after three add " +
+        // solo.getCurrentListViews().get(0).getCount());
+        solo.clickInList(0);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(998.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(997.50)));
+    }
+
+    public void editOpMode2() {
+        addOpMode2();
+
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        solo.waitForActivity(OperationEditor.class);
+        solo.clearEditText(SUM_FIELD_IDX);
+        solo.enterText(SUM_FIELD_IDX, "+2");
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        solo.clickInList(0);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(998.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
+        // Log.d(TAG, "editOpMode2 after one edit " + solo.getCurrentListViews().get(0).getCount());
+        solo.clickInList(3);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        solo.clearEditText(4);
+        solo.enterText(4, "+2");
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        solo.clickInList(0);
+        // Log.d(TAG, "editOpMode2 after two edit " + solo.getCurrentListViews().get(0).getCount());
+        assertEquals(3, solo.getCurrentViews(ListView.class).get(0).getCount());
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1001.50)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(1003.50)));
+    }
+
+    private void delOps() {
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnButton(solo.getString(R.string.yes));
+        tools.sleep(1000);
+        solo.waitForDialogToClose(WAIT_DIALOG_TIME);
+        solo.clickInList(0);
+        String sum = Formater.getSumFormater().format(1001.50);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(sum));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(sum));
+        solo.clickInList(2);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnButton(solo.getString(R.string.yes));
+        solo.waitForDialogToClose(WAIT_DIALOG_TIME);
+        solo.clickInList(0);
+        String sum2 = Formater.getSumFormater().format(999.50);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(sum2));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(sum2));
+    }
+
+    public void testDelOpMode1() {
+        TAG = "testDelOpMode1";
+        editOpMode1();
+        delOps();
+    }
+
+    public void testDelOpMode2() {
+        TAG = "testDelOpMode2";
+        editOpMode2();
+        delOps();
+    }
 }
