@@ -2,6 +2,7 @@ package fr.geobert.radis.robotium;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -796,5 +797,107 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         TAG = "testDelOpMode2";
         editOpMode2();
         delOps();
+    }
+
+//    // test for issue 95
+//    public void testDelOpMode1_2() {
+//        TAG = "testDelOpMode1_2";
+//        setUpOpTest();
+//        for (int j = 0; j < 10; ++j) {
+//            solo.clickOnActionBarItem(R.id.create_operation);
+//            solo.waitForActivity(OperationEditor.class);
+//            solo.enterText(3, OP_TP + j);
+//            solo.enterText(4, "10");
+//            solo.enterText(5, OP_TAG);
+//            solo.enterText(6, OP_MODE);
+//            solo.enterText(7, OP_DESC);
+//            solo.clickOnActionBarItem(R.id.confirm);
+//            solo.waitForActivity(OperationListActivity.class);
+//        }
+//        solo.waitForView(ListView.class);
+//        tools.scrollUp();
+//        tools.printCurrentTextViews();
+//        assertTrue(solo.waitForText(OP_TP + "9"));
+//        solo.clickOnText(OP_TP + "9");
+//        Log.d(TAG, "testDelOpMode1_2 sum at selection after first adds: " + solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString());
+//        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(900.50)));
+//        GregorianCalendar today = Tools.createClearedCalendar();
+//        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
+//        today.add(Calendar.MONTH, -1);
+//        for (int i = 0; i < 10; ++i) {
+//            addOpOnDate(today, i);
+//        }
+//
+//        solo.clickInList(6);
+//        tools.sleep(500);
+//        tools.printCurrentTextViews();
+//        Log.d(TAG, "testDelOpMode1_2 sum at selection : " + solo.getText(6).getText().toString());
+//        Log.d(TAG, "testDelOpMode1_2 sum at proj : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
+//        assertTrue(solo.getText(6).getText().toString().contains(Formater.getSumFormater().format(970.50)));
+//        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(890.50)));
+//
+//        solo.clickInList(9);
+//        Log.d(TAG, "testDelOpMode1_2 sum at selection 2 : " + solo.getText(0).getText().toString());
+//        Log.d(TAG, "testDelOpMode1_2 sum at proj 2 : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
+//        assertTrue(solo.getText(0).getText().toString().contains(Formater.getSumFormater().format(992.50)));
+//        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(890.50)));
+//        solo.clickInList(9);
+//        tools.sleep(1000);
+//        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+//        solo.clickOnButton(solo.getString(R.string.yes));
+//
+//        Log.d(TAG, "testDelOpMode1_2 sum at selection after del : " + solo.getText(0).getText().toString());
+//        Log.d(TAG, "testDelOpMode1_2 sum at proj after del : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
+//        tools.printCurrentTextViews();
+//        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("= 891,50"));
+//        assertTrue(solo.getText(0).getText().toString().contains("= 993,50"));
+//    }
+
+    // test transfert
+
+    private void addTransfertOp() {
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(OperationEditor.class);
+        solo.waitForView(CheckBox.class);
+        solo.clickOnCheckBox(0);
+        solo.pressSpinnerItem(1, 2);
+        for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+            solo.enterText(3, String.valueOf(OP_AMOUNT.charAt(i)));
+        }
+        solo.enterText(4, OP_TAG);
+        solo.enterText(5, OP_MODE);
+        solo.enterText(6, OP_DESC);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        tools.printCurrentTextViews();
+        solo.clickInList(0);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
+        assertTrue(solo.getText(9).getText().toString().equals(OP_AMOUNT_FORMATED));
+    }
+
+    public void simpleTransfert() {
+        addAccount();
+        addAccount2();
+        solo.waitForActivity(OperationListActivity.class);
+        addTransfertOp();
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(3).getText().toString()
+                .contains(Formater.getSumFormater().format(990.00)));
+        assertTrue(solo.getText(6).getText().toString()
+                .contains(Formater.getSumFormater().format(2011.00)));
+    }
+
+    public void testDelSimpleTransfert() {
+        TAG = "testDelSimpleTransfert";
+        simpleTransfert();
+        solo.clickOnImageButton(R.id.delete_op);
+        solo.clickOnButton(solo.getString(R.string.yes));
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(3).getText().toString()
+                .contains(Formater.getSumFormater().format(1000.50)));
+        assertTrue(solo.getText(6).getText().toString()
+                .contains(Formater.getSumFormater().format(2000.50)));
     }
 }
