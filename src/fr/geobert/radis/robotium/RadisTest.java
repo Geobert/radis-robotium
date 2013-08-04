@@ -320,7 +320,6 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.enterText(6, OP_MODE);
         solo.enterText(7, OP_DESC);
         solo.clickOnText(solo.getString(R.string.scheduling));
-        solo.pressSpinnerItem(0, 1);
         solo.pressSpinnerItem(1, -1);
         solo.clickOnActionBarItem(R.id.confirm);
         solo.waitForView(ListView.class);
@@ -345,7 +344,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.clickInList(nbOps - (nbOps - 2));
         solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
         solo.clickOnButton(solo.getString(R.string.del_all_following));
-        tools.sleep(600);
+        tools.sleep(1000);
 //        solo.clickInList(solo.getCurrentViews(ListView.class).get(0).getCount());
 //        assertEquals(2, solo.getCurrentViews(ListView.class).get(0).getCount() - 1);
         int newNbOps = solo.getCurrentViews(ListView.class).get(0).getCount();
@@ -353,8 +352,8 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         tools.printCurrentTextViews();
         Log.d(TAG, "interface text : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString()
                 + " / " + Formater.getSumFormater().format(1000.5 - newNbOps) + " nbops / newnbops " + nbOps + " / " + newNbOps);
-        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString()
-                .contains(Formater.getSumFormater().format(1000.5 - newNbOps)));
+        assertTrue(solo.waitForText(Formater.getSumFormater().format(1000.5 - newNbOps)));
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.5 - newNbOps)));
     }
 
     public void testDelAllOccurencesFromOps() {
@@ -363,11 +362,9 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.clickInList(nbOps - (nbOps - 2));
         solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
         solo.clickOnButton(solo.getString(R.string.del_all_occurrences));
-        tools.sleep(1000);
-        assertEquals(0, solo.getCurrentViews(ListView.class).get(0).getCount());
+        assertTrue(solo.waitForText(solo.getString(R.string.no_operation)));
         tools.printCurrentTextViews();
-        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString()
-                .contains(Formater.getSumFormater().format(1000.5)));
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.5)));
     }
 
     // issue 112 : it was about when clicking on + or - of date chooser then cancel that does not work
@@ -530,7 +527,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         Log.d(TAG, "testProjectionFromOpList : " + Tools.getDateStr(today) + " VS " + projDateTxt + "/" + projSumTxt);
         assertTrue(projDateTxt.contains(Tools.getDateStr(today)));
         assertTrue(projSumTxt.contains(Formater.getSumFormater().format(994.50)));
-        solo.clickInList(0);
+        tools.scrollUp();
         tools.printCurrentTextViews();
         assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(994.50)));
 
@@ -769,13 +766,11 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.clickInList(0);
         solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
         solo.clickOnButton(solo.getString(R.string.yes));
-        tools.sleep(1000);
         solo.waitForDialogToClose(WAIT_DIALOG_TIME);
-        solo.clickInList(0);
         String sum = Formater.getSumFormater().format(1001.50);
+        solo.clickInList(0);
         tools.printCurrentTextViews();
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(sum));
-        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(sum));
         solo.clickInList(2);
         solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
         solo.clickOnButton(solo.getString(R.string.yes));
@@ -882,22 +877,41 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         addAccount2();
         solo.waitForActivity(OperationListActivity.class);
         addTransfertOp();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
+        solo.pressSpinnerItem(0, 1);
         tools.printCurrentTextViews();
-        assertTrue(solo.getText(3).getText().toString()
-                .contains(Formater.getSumFormater().format(990.00)));
-        assertTrue(solo.getText(6).getText().toString()
-                .contains(Formater.getSumFormater().format(2011.00)));
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2011.00)));
+        solo.pressSpinnerItem(0, -1);
     }
 
     public void testDelSimpleTransfert() {
         TAG = "testDelSimpleTransfert";
         simpleTransfert();
-        solo.clickOnImageButton(R.id.delete_op);
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
         solo.clickOnButton(solo.getString(R.string.yes));
         tools.printCurrentTextViews();
-        assertTrue(solo.getText(3).getText().toString()
-                .contains(Formater.getSumFormater().format(1000.50)));
-        assertTrue(solo.getText(6).getText().toString()
-                .contains(Formater.getSumFormater().format(2000.50)));
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
     }
+
+    public void testEditTransfertToNoTransfertAnymore() {
+        TAG = "testEditTransfertToNoTransfertAnymore";
+        simpleTransfert();
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        solo.clickOnCheckBox(0);
+        solo.enterText(3, OP_TP);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
+    }
+
+   
 }
