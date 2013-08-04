@@ -913,5 +913,21 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
     }
 
-   
+    public void testEditSimpleTrans3accounts() {
+        TAG = "testEditSimpleTrans3accounts";
+        simpleTransfert();
+        addAccount3();
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        solo.waitForActivity(OperationEditor.class);
+        solo.pressSpinnerItem(1, 1);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
+        solo.pressSpinnerItem(0, 1);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
+        solo.pressSpinnerItem(0, 1);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1011.00)));
+    }
 }
