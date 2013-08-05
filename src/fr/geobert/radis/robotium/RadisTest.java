@@ -493,15 +493,15 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
 
     private void addOpOnDate(GregorianCalendar t, int idx) {
         solo.clickOnActionBarItem(R.id.create_operation);
-        solo.waitForActivity(OperationEditor.class);
-        solo.waitForView(DatePicker.class);
+        assertTrue(solo.waitForActivity(OperationEditor.class));
+        assertTrue(solo.waitForView(DatePicker.class));
         solo.setDatePicker(0, t.get(Calendar.YEAR), t.get(Calendar.MONTH),
                 t.get(Calendar.DAY_OF_MONTH));
         solo.enterText(3, OP_TP + "/" + idx);
         solo.enterText(4, "1");
         solo.clickOnActionBarItem(R.id.confirm);
-        solo.waitForActivity(OperationListActivity.class);
-        solo.waitForView(ListView.class);
+        assertTrue(solo.waitForActivity(OperationListActivity.class));
+        assertTrue(solo.waitForView(ListView.class));
     }
 
     private void setUpProjTest1() {
@@ -794,60 +794,6 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         delOps();
     }
 
-//    // test for issue 95
-//    public void testDelOpMode1_2() {
-//        TAG = "testDelOpMode1_2";
-//        setUpOpTest();
-//        for (int j = 0; j < 10; ++j) {
-//            solo.clickOnActionBarItem(R.id.create_operation);
-//            solo.waitForActivity(OperationEditor.class);
-//            solo.enterText(3, OP_TP + j);
-//            solo.enterText(4, "10");
-//            solo.enterText(5, OP_TAG);
-//            solo.enterText(6, OP_MODE);
-//            solo.enterText(7, OP_DESC);
-//            solo.clickOnActionBarItem(R.id.confirm);
-//            solo.waitForActivity(OperationListActivity.class);
-//        }
-//        solo.waitForView(ListView.class);
-//        tools.scrollUp();
-//        tools.printCurrentTextViews();
-//        assertTrue(solo.waitForText(OP_TP + "9"));
-//        solo.clickOnText(OP_TP + "9");
-//        Log.d(TAG, "testDelOpMode1_2 sum at selection after first adds: " + solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString());
-//        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(900.50)));
-//        GregorianCalendar today = Tools.createClearedCalendar();
-//        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
-//        today.add(Calendar.MONTH, -1);
-//        for (int i = 0; i < 10; ++i) {
-//            addOpOnDate(today, i);
-//        }
-//
-//        solo.clickInList(6);
-//        tools.sleep(500);
-//        tools.printCurrentTextViews();
-//        Log.d(TAG, "testDelOpMode1_2 sum at selection : " + solo.getText(6).getText().toString());
-//        Log.d(TAG, "testDelOpMode1_2 sum at proj : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
-//        assertTrue(solo.getText(6).getText().toString().contains(Formater.getSumFormater().format(970.50)));
-//        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(890.50)));
-//
-//        solo.clickInList(9);
-//        Log.d(TAG, "testDelOpMode1_2 sum at selection 2 : " + solo.getText(0).getText().toString());
-//        Log.d(TAG, "testDelOpMode1_2 sum at proj 2 : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
-//        assertTrue(solo.getText(0).getText().toString().contains(Formater.getSumFormater().format(992.50)));
-//        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(890.50)));
-//        solo.clickInList(9);
-//        tools.sleep(1000);
-//        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
-//        solo.clickOnButton(solo.getString(R.string.yes));
-//
-//        Log.d(TAG, "testDelOpMode1_2 sum at selection after del : " + solo.getText(0).getText().toString());
-//        Log.d(TAG, "testDelOpMode1_2 sum at proj after del : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
-//        tools.printCurrentTextViews();
-//        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains("= 891,50"));
-//        assertTrue(solo.getText(0).getText().toString().contains("= 993,50"));
-//    }
-
     // test transfert
 
     private void addTransfertOp() {
@@ -929,5 +875,177 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
         solo.pressSpinnerItem(0, 1);
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1011.00)));
+    }
+
+    private void setUpSchTransOp() {
+        addAccount();
+        addAccount2();
+        solo.clickOnActionBarItem(R.id.go_to_preferences);
+        solo.waitForActivity(RadisConfiguration.class);
+        assertTrue(solo.waitForText(solo.getString(R.string.prefs_insertion_date_label)));
+        solo.clickOnText(solo.getString(R.string.prefs_insertion_date_label));
+        solo.clearEditText(0);
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.add(Calendar.DAY_OF_MONTH, -1);
+        solo.enterText(0, Integer.toString(today.get(Calendar.DAY_OF_MONTH)));
+        solo.clickOnButton(solo.getString(R.string.ok));
+        solo.goBack();
+    }
+
+    private void addSchTransfert() {
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(ScheduledOperationEditor.class);
+        GregorianCalendar today = Tools.createClearedCalendar();
+        solo.setDatePicker(0, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+        solo.clickOnCheckBox(0);
+        solo.waitForView(Spinner.class);
+        solo.pressSpinnerItem(1, 2);
+        for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+            solo.enterText(3, String.valueOf(OP_AMOUNT.charAt(i)));
+        }
+        solo.enterText(4, OP_TAG);
+        solo.enterText(5, OP_MODE);
+        solo.enterText(6, OP_DESC);
+        solo.clickOnActionBarItem(R.id.confirm);
+        assertTrue(solo.waitForActivity(ScheduledOpListActivity.class));
+    }
+
+    public void makeSchTransfertFromAccList() {
+        setUpSchTransOp();
+        solo.clickOnActionBarItem(R.id.go_to_sch_op);
+        assertTrue(solo.waitForActivity(ScheduledOpListActivity.class));
+        addSchTransfert();
+        solo.goBack();
+        assertTrue(solo.waitForActivity(OperationListActivity.class));
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2011.00)));
+        solo.pressSpinnerItem(0, -1);
+    }
+
+    public void testDelSchTransfert() {
+        TAG = "testDelSchTransfert";
+        makeSchTransfertFromAccList();
+        solo.clickOnActionBarItem(R.id.go_to_sch_op);
+        solo.waitForActivity(ScheduledOpListActivity.class);
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnButton(solo.getString(R.string.del_all_occurrences));
+        tools.sleep(1000);
+        assertTrue(solo.waitForText(solo.getString(R.string.no_operation_sch)));
+        solo.goBack();
+        solo.waitForActivity(OperationListActivity.class);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
+    }
+
+    private void addSchTransfertHebdo() {
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(ScheduledOperationEditor.class);
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.set(Calendar.DAY_OF_MONTH, 12);
+        today.add(Calendar.MONTH, -1);
+        solo.setDatePicker(0, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+        solo.clickOnCheckBox(0);
+        solo.waitForView(Spinner.class);
+        solo.pressSpinnerItem(1, 2);
+        for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+            solo.enterText(3, String.valueOf(OP_AMOUNT.charAt(i)));
+        }
+        solo.enterText(4, OP_TAG);
+        solo.enterText(5, OP_MODE);
+        solo.enterText(6, OP_DESC);
+        tools.scrollUp();
+        solo.clickOnText(solo.getString(R.string.scheduling));
+        solo.waitForText(solo.getString(R.string.account));
+        solo.pressSpinnerItem(1, -1);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(ScheduledOpListActivity.class);
+        solo.goBack();
+        assertTrue(solo.waitForActivity(OperationListActivity.class));
+        assertTrue(solo.waitForView(ListView.class));
+        tools.printCurrentTextViews();
+        double sum = 8 * 10.50;
+        solo.pressSpinnerItem(0, -1);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50 - sum)));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50 + sum)));
+        solo.pressSpinnerItem(0, -1);
+    }
+
+    public void makeSchTransfertHebdoFromAccList() {
+        setUpSchTransOp();
+        solo.clickOnActionBarItem(R.id.go_to_sch_op);
+        assertTrue(solo.waitForActivity(ScheduledOpListActivity.class));
+        addSchTransfertHebdo();
+    }
+
+    public void testDelSchTransfFromOpsList() {
+        TAG = "testDelSchTransfFromOpsList";
+        makeSchTransfertHebdoFromAccList();
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnText(solo.getString(R.string.del_only_current));
+        tools.sleep(1000);
+        tools.printCurrentTextViews();
+        double sum = 7 * 10.50;
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50 - sum)));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50 + sum)));
+    }
+
+    public void testDelAllOccSchTransfFromOpsList() {
+        TAG = "testDelAllOccSchTransfFromOpsList";
+        makeSchTransfertHebdoFromAccList();
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnText(solo.getString(R.string.del_all_occurrences));
+        tools.sleep(1000);
+        tools.printCurrentTextViews();
+        String startSum = Formater.getSumFormater().format(1000.50);
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(startSum));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
+    }
+
+    public void testDelFutureSchTransfFromOpsList() {
+        TAG = "testDelFutureSchTransfFromOpsList";
+        makeSchTransfertHebdoFromAccList();
+        solo.clickInList(3);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnText(solo.getString(R.string.del_all_following));
+        tools.sleep(1000);
+        tools.printCurrentTextViews();
+        double sum = 5 * 10.50;
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50 - sum)));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50 + sum)));
+    }
+
+    public void testDelAllOccSchTransfFromSchList() {
+        TAG = "testDelAllOccSchTransfFromSchList";
+        makeSchTransfertHebdoFromAccList();
+        solo.clickOnActionBarItem(R.id.go_to_sch_op);
+        assertTrue(solo.waitForActivity(ScheduledOpListActivity.class));
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.delete_op));
+        solo.clickOnText(solo.getString(R.string.del_all_occurrences));
+        tools.sleep(1000);
+        solo.goBack();
+        solo.waitForActivity(OperationListActivity.class);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
+        solo.pressSpinnerItem(0, 1);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
     }
 }
