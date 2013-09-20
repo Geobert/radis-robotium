@@ -173,8 +173,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     }
 
     public void addOp() {
-        setUpOpTest();
-        solo.pressMenuItem(0);
+        solo.clickOnActionBarItem(R.id.create_operation);
         solo.waitForActivity(OperationEditor.class);
         solo.enterText(3, OP_TP);
         for (int i = 0; i < OP_AMOUNT.length(); ++i) {
@@ -184,9 +183,8 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.enterText(6, OP_MODE);
         solo.enterText(7, OP_DESC);
         solo.clickOnActionBarItem(R.id.confirm);
-        assertTrue(solo.getText(1).getText().toString().contains(Formater.getSumFormater().format(990)));
-        assertTrue(solo.getText(4).getText().toString()
-                .equals(OP_AMOUNT_FORMATED));
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
     }
 
     public void addManyOps() {
@@ -956,7 +954,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.pressSpinnerItem(0, -1);
     }
 
-    public void _tetDelSchTransfert() {
+    public void testDelSchTransfert() {
         TAG = "testDelSchTransfert";
         makeSchTransfertFromAccList();
         solo.clickOnActionBarItem(R.id.go_to_sch_op);
@@ -1080,5 +1078,13 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50)));
     }
 
-
+    // issue #30 on github
+    public void testSumAtSelectionOnOthersAccount() {
+        addAccount();
+        addAccount2();
+        solo.pressSpinnerItem(0, 1);
+        addOp();
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50 - 10.50)));
+    }
 }
