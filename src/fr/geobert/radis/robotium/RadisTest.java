@@ -1081,10 +1081,39 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     // issue #30 on github
     public void testSumAtSelectionOnOthersAccount() {
         addAccount();
+        GregorianCalendar today = Tools.createClearedCalendar();
+        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
+        today.add(Calendar.MONTH, -1);
+        for (int i = 0; i < 3; ++i) {
+            addOpOnDate(today, i);
+            today.add(Calendar.MONTH, +1);
+        }
+        solo.clickOnActionBarItem(R.id.go_to_edit_account);
+        solo.waitForActivity(AccountEditor.class);
+        solo.pressSpinnerItem(1, 1);
+        tools.hideKeyboard();
+        assertTrue(solo.waitForView(EditText.class));
+        assertTrue(solo.getCurrentViews(EditText.class).get(3).isEnabled());
+        today = Tools.createClearedCalendar();
+        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28));
+        solo.enterText(3, Integer.toString(Math.min(today.get(Calendar.DAY_OF_MONTH), 28)));
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+        solo.clickInList(2);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(12).getText().toString().contains(Formater.getSumFormater().format(1000.50 - 2.00)));
+
         addAccount2();
         solo.pressSpinnerItem(0, 1);
         addOp();
+        solo.clickInList(0);
         tools.printCurrentTextViews();
         assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50 - 10.50)));
+
+        solo.pressSpinnerItem(0, -1);
+        solo.clickInList(2);
+        tools.printCurrentTextViews();
+        assertTrue(solo.getText(12).getText().toString().contains(Formater.getSumFormater().format(1000.50 - 2.00)));
     }
 }
