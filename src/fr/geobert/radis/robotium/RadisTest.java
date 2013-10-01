@@ -38,7 +38,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
 
     static String TAG = "RadisRobotium";
     static final String ACCOUNT_NAME = "Test";
-    static final String ACCOUNT_START_SUM = "1000,50";
+    static final String ACCOUNT_START_SUM = "+1000,50";
     static final String ACCOUNT_START_SUM_FORMATED_IN_EDITOR = "1 000,50";
     static final String ACCOUNT_START_SUM_FORMATED_ON_LIST = "1 000,50 €";
     static final String ACCOUNT_DESC = "Test Description";
@@ -187,6 +187,22 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.waitForView(ListView.class);
     }
 
+    public void addPositiveOp() {
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(OperationEditor.class);
+        solo.enterText(3, OP_TP);
+        solo.enterText(4, "+");
+        for (int i = 0; i < OP_AMOUNT.length(); ++i) {
+            solo.enterText(4, String.valueOf(OP_AMOUNT.charAt(i)));
+        }
+        solo.enterText(5, OP_TAG);
+        solo.enterText(6, OP_MODE);
+        solo.enterText(7, OP_DESC);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+    }
+
     public void addManyOps() {
         setUpOpTest();
         for (int j = 0; j < 10; ++j) {
@@ -204,19 +220,19 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(0.5)));
     }
 
-    public void EditOp() {
+    public void testEditOp() {
         TAG = "testEditOp";
         addManyOps();
         tools.sleep(1000);
         tools.scrollUp();
         solo.clickInList(5, 0);
         tools.sleep(2000);
-        solo.clickOnImageButton(0);
-        solo.waitForActivity(OperationEditor.class);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        assertTrue(solo.waitForActivity(OperationEditor.class));
         solo.clearEditText(4);
         solo.enterText(4, "103");
         solo.clickOnActionBarItem(R.id.confirm);
-        solo.waitForActivity(OperationListActivity.class);
+        assertTrue(solo.waitForActivity(OperationListActivity.class));
         tools.sleep(500);
         tools.printCurrentTextViews();
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(-2.5)));
@@ -1115,5 +1131,48 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.clickInList(2);
         tools.printCurrentTextViews();
         assertTrue(solo.getText(12).getText().toString().contains(Formater.getSumFormater().format(1000.50 - 2.00)));
+    }
+
+    public void addOpNoTagsNorMode() {
+        solo.clickOnActionBarItem(R.id.create_operation);
+        solo.waitForActivity(OperationEditor.class);
+        solo.enterText(3, OP_TP);
+        solo.enterText(4, OP_AMOUNT);
+        solo.clickOnActionBarItem(R.id.confirm);
+        solo.waitForActivity(OperationListActivity.class);
+        solo.waitForView(ListView.class);
+    }
+
+    // issue #31
+    public void testEmptyInfoCreation() {
+        addAccount();
+        addOpNoTagsNorMode();
+        solo.clickInList(0);
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op));
+        assertTrue(solo.waitForActivity(OperationEditor.class));
+        assertTrue(solo.waitForView(R.id.edit_op_tags_list));
+        solo.clickOnImageButton(tools.findIndexOfImageButton(R.id.edit_op_tags_list));
+        solo.waitForView(ListView.class);
+        assertEquals(0, solo.getCurrentViews(ListView.class).get(0).getCount());
+    }
+
+    // issue #32
+    public void testCorruptedCustomPeriodicity() {
+        addAccount();
+        solo.clickOnActionBarItem(R.id.go_to_sch_op);
+        assertTrue(solo.waitForActivity(ScheduledOpListActivity.class));
+        solo.clickOnActionBarItem(R.id.create_operation);
+        assertTrue(solo.waitForActivity(ScheduledOperationEditor.class));
+        solo.enterText(3, OP_TP);
+        solo.enterText(4, OP_AMOUNT);
+        tools.scrollUp();
+        solo.clickOnText(solo.getString(R.string.scheduling));
+        solo.pressSpinnerItem(1, 2);
+        solo.enterText(0, ".");
+        solo.enterText(0, "2");
+        solo.clickOnText(solo.getString(R.string.basics));
+        solo.clickOnText(solo.getString(R.string.scheduling));
+        tools.sleep(5000);
+        solo.clickOnActionBarItem(R.id.confirm);
     }
 }
