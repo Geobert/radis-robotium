@@ -22,6 +22,7 @@ import fr.geobert.radis.ui.editor.AccountEditor;
 import fr.geobert.radis.ui.editor.OperationEditor;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -43,7 +44,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     static final String ACCOUNT_START_SUM_FORMATED_ON_LIST = "1 000,50 €";
     static final String ACCOUNT_DESC = "Test Description";
     static final String ACCOUNT_NAME_2 = "Test2";
-    static final String ACCOUNT_START_SUM_2 = "2000,50";
+    static final String ACCOUNT_START_SUM_2 = "+2000,50";
     static final String ACCOUNT_START_SUM_FORMATED_ON_LIST_2 = "2 000,50 €";
     static final String ACCOUNT_DESC_2 = "Test Description 2";
     static final String ACCOUNT_NAME_3 = "Test3";
@@ -117,8 +118,18 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertEquals(ACCOUNT_START_SUM_FORMATED_ON_LIST, solo.getText(CUR_ACC_SUM_IDX).getText().toString());
     }
 
+    private void callAccountCreation() {
+        solo.clickOnActionBarItem(R.id.go_to_create_account);
+        //solo.pressMenuItem(1);
+    }
+
+    private void callAccountEdit() {
+        solo.clickOnActionBarItem(R.id.go_to_edit_account);
+//        solo.pressMenuItem(2);
+    }
+
     public void addAccount2() {
-        solo.pressMenuItem(0);
+        callAccountCreation();
         solo.waitForActivity(AccountEditor.class);
         solo.enterText(0, ACCOUNT_NAME_2);
         solo.enterText(1, ACCOUNT_START_SUM_2);
@@ -129,7 +140,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     }
 
     public void addAccount3() {
-        solo.pressMenuItem(0);
+        callAccountCreation();
         assertTrue(solo.waitForActivity(AccountEditor.class));
         solo.enterText(0, ACCOUNT_NAME_3);
         solo.enterText(1, ACCOUNT_START_SUM);
@@ -140,7 +151,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     }
 
     public void editAccount() {
-        solo.pressMenuItem(1);
+        callAccountEdit();
         solo.waitForActivity(AccountEditor.class);
         assertEquals(ACCOUNT_NAME, solo.getEditText(0).getText().toString());
         assertEquals(ACCOUNT_START_SUM_FORMATED_IN_EDITOR, solo.getEditText(1).getText().toString());
@@ -160,7 +171,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
     }
 
     public void deleteAccount(int originalCount) {
-        solo.pressMenuItem(2);
+        solo.clickOnActionBarItem(R.id.delete_account);
         solo.clickOnButton(solo.getString(fr.geobert.radis.R.string.yes));
         solo.waitForDialogToClose(WAIT_DIALOG_TIME);
         if (originalCount > 1) {
@@ -550,6 +561,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
 
     public void testProjectionFromOpList() {
         TAG = "testProjectionFromOpList";
+
         // test mode 0
         setUpProjTest1();
         assertTrue(solo.waitForActivity(OperationListActivity.class));
@@ -569,7 +581,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(994.50)));
 
         // test mode 1
-        solo.pressMenuItem(4);
+        callAccountEdit();
         solo.waitForActivity(AccountEditor.class);
         solo.pressSpinnerItem(1, 1);
         tools.hideKeyboard();
@@ -592,7 +604,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(994.50)));
 
         // test mode 2
-        solo.pressMenuItem(4);
+        callAccountEdit();
         solo.waitForActivity(AccountEditor.class);
         solo.pressSpinnerItem(1, 1);
         tools.hideKeyboard();
@@ -601,11 +613,12 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         today = Tools.createClearedCalendar();
         today.set(Calendar.DAY_OF_MONTH, 28);
         today.add(Calendar.MONTH, +3);
-        solo.enterText(3, Tools.getDateStr(today));
+        SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
+        solo.enterText(3, f.format(today.getTime()));
         solo.clickOnActionBarItem(R.id.confirm);
         solo.waitForActivity(OperationListActivity.class);
         solo.waitForView(ListView.class);
-        Log.d(TAG, "2DATE : " + Tools.getDateStr(today));
+        Log.d(TAG, "2DATE : " + f.format(today.getTime()));
         projDateTxt = solo.getCurrentViews(TextView.class).get(CUR_ACC_PROJ_DATE_IDX).getText().toString();
         Log.d(TAG, "2DATE displayed : " + projDateTxt);
         tools.printCurrentTextViews();
@@ -625,8 +638,8 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.getText(25).getText().toString().contains(Formater.getSumFormater().format(998.50)));
 
         // test back to mode 0
-        solo.pressMenuItem(4);
-        solo.waitForActivity(RadisConfiguration.class);
+        callAccountEdit();
+        solo.waitForActivity(AccountEditor.class);
         solo.pressSpinnerItem(1, -2);
         tools.hideKeyboard();
         assertTrue(solo.waitForView(EditText.class));
@@ -641,7 +654,8 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         Log.d(TAG, "solo.getButton(0).getText() : " + projSumTxt);
         tools.printCurrentTextViews();
         assertTrue(projSumTxt.contains(Formater.getSumFormater().format(994.50)));
-        assertTrue(solo.getText(25).getText().toString().contains(Formater.getSumFormater().format(998.50)));
+        assertEquals(solo.getCurrentViews(TextView.class).get(34).getText().toString(),
+                Formater.getSumFormater().format(998.50));
     }
 
     public void addOpMode1() {
@@ -704,6 +718,7 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.waitForActivity(OperationListActivity.class));
         solo.clickInList(0);
         tools.printCurrentTextViews();
+
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(998.50)));
         assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50)));
         // Log.d(TAG, "editOpMode1 after one edit " + solo.getCurrentListViews().get(0).getCount());
@@ -718,8 +733,11 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         // Log.d(TAG, "editOpMode1 after one edit " + solo.getCurrentListViews().get(0).getCount());
         solo.clickInList(0);
         assertEquals(3, solo.getCurrentViews(ListView.class).get(0).getCount());
+        Log.d(TAG, "editOpMode1 CUR_ACC_SUM : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1001.50)));
+        Log.d(TAG, "editOpMode1 FIRST_SUM_AT_SEL_IDX : " + solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString());
         assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(1003.50)));
+
     }
 
     public void addOpMode2() {
@@ -851,11 +869,12 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.waitForActivity(OperationListActivity.class));
         assertTrue(solo.waitForView(ListView.class));
         solo.pressSpinnerItem(0, -1);
+        tools.sleep(600);
         tools.printCurrentTextViews();
         solo.clickInList(0);
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
         assertTrue(solo.getText(FIRST_SUM_AT_SEL_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
-        assertTrue(solo.getText(9).getText().toString().equals(OP_AMOUNT_FORMATED));
+        assertTrue(solo.getText(9).getText().toString().equals(Formater.getSumFormater().format(-10.50)));
     }
 
     public void simpleTransfert() {
@@ -863,7 +882,6 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         addAccount2();
         assertTrue(solo.waitForActivity(OperationListActivity.class));
         addTransfertOp();
-        assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(990.00)));
         solo.pressSpinnerItem(0, 1);
         tools.printCurrentTextViews();
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2011.00)));
@@ -1015,11 +1033,16 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         assertTrue(solo.waitForActivity(OperationListActivity.class));
         assertTrue(solo.waitForView(ListView.class));
         tools.printCurrentTextViews();
-        double sum = 8 * 10.50;
+        int n = solo.getCurrentViews(ListView.class).get(0).getCount();
+        double sum = n * 10.50;
         solo.pressSpinnerItem(0, -1);
+        Log.d(TAG, "addSchTransfertHebdo sum = " + sum + " / nb = " + n);
+        Log.d(TAG, "addSchTransfertHebdo CUR_ACC_SUM_IDX : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50 - sum)));
         solo.pressSpinnerItem(0, 1);
+        tools.sleep(1000);
         tools.printCurrentTextViews();
+        Log.d(TAG, "addSchTransfertHebdo CUR_ACC_SUM_IDX 2 : " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50 + sum)));
         solo.pressSpinnerItem(0, -1);
     }
@@ -1039,10 +1062,13 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.clickOnText(solo.getString(R.string.del_only_current));
         tools.sleep(1000);
         tools.printCurrentTextViews();
-        double sum = 7 * 10.50;
+        int n = solo.getCurrentViews(ListView.class).get(0).getCount();
+        double sum = n * 10.50;
+        Log.d(TAG, "CUR_ACC_SUM_IDX: " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50 - sum)));
         solo.pressSpinnerItem(0, 1);
         tools.printCurrentTextViews();
+        Log.d(TAG, "CUR_ACC_SUM_IDX2: " + solo.getText(CUR_ACC_SUM_IDX).getText().toString());
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(2000.50 + sum)));
     }
 
@@ -1069,7 +1095,8 @@ public class RadisTest extends ActivityInstrumentationTestCase2<OperationListAct
         solo.clickOnText(solo.getString(R.string.del_all_following));
         tools.sleep(1000);
         tools.printCurrentTextViews();
-        double sum = 5 * 10.50;
+        int n = solo.getCurrentViews(ListView.class).get(0).getCount();
+        double sum = n * 10.50;
         assertTrue(solo.getText(CUR_ACC_SUM_IDX).getText().toString().contains(Formater.getSumFormater().format(1000.50 - sum)));
         solo.pressSpinnerItem(0, 1);
         tools.printCurrentTextViews();
