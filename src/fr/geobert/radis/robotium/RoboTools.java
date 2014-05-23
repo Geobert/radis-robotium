@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import com.jayway.android.robotium.solo.Solo;
+import com.robotium.solo.Solo;
 import fr.geobert.radis.tools.Formater;
 
 import java.util.ArrayList;
@@ -81,8 +81,15 @@ class RoboTools {
     }
 
     int findIndexOfImageButton(int id) {
+        Log.d("RoboTools", "findIndexOfImageButton wanted id : " + id);
         int res = -1;
         ArrayList<ImageButton> a = solo.getCurrentViews(ImageButton.class);
+        for (int i = 0; i < a.size(); i++) {
+            ImageButton b = a.get(i);
+            Log.d("RoboTools", "findIndexOfImageButton id : " + b.getId());
+            Log.d("RoboTools", "findIndexOfImageButton visibility : " + b.getVisibility());
+        }
+
         int j = 0;
         for (int i = 0; i < a.size(); i++) {
             ImageButton b = a.get(i);

@@ -4,7 +4,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
-import com.jayway.android.robotium.solo.Solo;
+import com.robotium.solo.Solo;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -94,10 +94,6 @@ public class Picker {
 
     /**
      * Clicks on an indiviual picker buttons, either + or -.
-     *
-     * @param plusButtonIndex
-     * @param currentNumber
-     * @param targetNumber
      */
     private void clickOnPickerButton(int clicks, int plusButtonIndex, int minusButtonIndex) {
         int buttonIndex = (clicks < 0) ? minusButtonIndex : plusButtonIndex;
@@ -139,7 +135,7 @@ public class Picker {
     }
 
     /**
-     * For the current activity, returns list of views of the specified class or
+     * For the current operationList, returns list of views of the specified class or
      * any of its subclasses.
      * <p/>
      * This method mimics the behavior of Robotium's
